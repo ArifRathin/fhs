@@ -1,0 +1,78 @@
+{% extends 'base-front-end/admin/base.html' %}
+{% block content %}
+<!--begin::App Main-->
+<main class="app-main">
+    <!--begin::App Content Header-->
+    <div class="app-content-header">
+        <!--begin::Container-->
+        <div class="container-fluid">
+            <!--begin::Row-->
+            <div class="row">
+                <div class="col-sm-6">
+                    <h3 class="mb-0">Update Permissions</h3>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-end">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Update Permissions</li>
+                    </ol>
+                </div>
+            </div>
+            <!--end::Row-->
+        </div>
+        <!--end::Container-->
+    </div>
+    <!--end::App Content Header-->
+    <!--begin::App Content-->
+    <div class="app-content">
+        <!--begin::Container-->
+        <div class="container-fluid">
+            <!--begin::Row-->
+            <div class="row g-4">
+                <!--begin::Col-->
+                <div class="col-12">
+                    <div class="callout callout-info">
+                        Alert message
+                    </div>
+                </div>
+                <!--end::Col-->
+                <!--begin::Col-->
+                <div class="col-md-6">
+                    <!--begin::Quick Example-->
+                    <div class="card card-primary card-outline mb-4">
+                        <!--begin::Form-->
+                        <form action="{% url 'update-permissions-admin' %}" method="POST">
+                            {% csrf_token %}
+                            <!--begin::Body-->
+                            <div class="card-body">
+                                <input type="hidden" name="admin-id" value="{{ admin.id }}">
+                                {% for permission in permissions %}
+                                    <div class="mb-3">
+                                        <input type="checkbox" {% if permission in admin.user_permissions.all %}checked{% endif %} name="permissions" value="{{ permission.id }}" class="pt-1" id="" aria-describedby="password" />{{ permission.name }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <!--end::Body-->
+                            <!--begin::Footer-->
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary">Update</button>
+                            </div>
+                            <!--end::Footer-->
+                        </form>
+                        <!--end::Form-->
+                    </div>
+                    <!--end::Quick Example-->
+                </div>
+                <!--end::Col-->
+                <!--begin::Col-->
+                <div class="col-md-6">
+                </div>
+                <!--end::Col-->
+            </div>
+            <!--end::Row-->
+        </div>
+        <!--end::Container-->
+    </div>
+    <!--end::App Content-->
+</main>
+{% endblock %}

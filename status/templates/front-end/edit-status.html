@@ -1,0 +1,85 @@
+{% extends 'base-front-end/admin/base.html' %}
+{% block content %}
+<!--begin::App Main-->
+<main class="app-main">
+  <!--begin::App Content Header-->
+  <div class="app-content-header">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-sm-6">
+          <h3 class="mb-0">Edit Report Status</h3>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Edit Report Status</li>
+          </ol>
+        </div>
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content Header-->
+  <!--begin::App Content-->
+  <div class="app-content">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row g-4">
+        <!--begin::Col-->
+        <div class="col-12">
+          <div class="callout callout-info">
+            Alert message
+          </div>
+        </div>
+        <!--end::Col-->
+        <!--begin::Col-->
+        <div class="col-md-6">
+          <!--begin::Quick Example-->
+          <div class="card card-primary card-outline mb-4">
+            <!--begin::Form-->
+            <form action="{% url 'edit-status' %}" method="POST">
+              {% csrf_token %}
+              <!--begin::Body-->
+              <div class="card-body">
+                <input type="hidden" name="status-id" value="{{ status.id }}">
+                <div class="mb-3">
+                  <label for="" class="form-label">Report Status</label>
+                  <input type="text" name="status" value="{{ status.status }}" class="form-control" id="" aria-describedby="reportStatus" />
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="is-active" id="active" value="1" {% if status.is_active == True %}checked{% endif %}/>
+                  <label class="form-check-label" for="active"> Active </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="is-active" id="inactive" value="0" {% if status.is_active == False %}checked{% endif %}/>
+                  <label class="form-check-label" for="inactive"> Inactive </label>
+                </div>
+              </div>
+              <!--end::Body-->
+              <!--begin::Footer-->
+              <div class="card-footer">
+                <button type="submit" class="btn btn-primary">Update</button>
+              </div>
+              <!--end::Footer-->
+            </form>
+            <!--end::Form-->
+          </div>
+          <!--end::Quick Example-->
+        </div>
+        <!--end::Col-->
+        <!--begin::Col-->
+        <div class="col-md-6">
+        </div>
+        <!--end::Col-->
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content-->
+</main>
+{% endblock %}

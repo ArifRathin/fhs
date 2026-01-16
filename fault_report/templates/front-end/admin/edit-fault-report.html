@@ -1,0 +1,236 @@
+{% extends 'base-front-end/admin/base.html' %}
+{% block title %}
+  <title>{{ page_ }}</title>
+{% endblock %}
+{% block content %}
+<!--begin::App Main-->
+<main class="app-main">
+  <!--begin::App Content Header-->
+  <div class="app-content-header">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-sm-6">
+          <h3 class="mb-0">{{ page_ }}</h3>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ page_ }}</li>
+          </ol>
+        </div>
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content Header-->
+  <!--begin::App Content-->
+  <div class="app-content">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row g-4">
+        <!--begin::Col-->
+        <div class="col-12">
+          {% for message in messages %}
+            {% if message.extra_tags == 'success-edit-report' %}
+              <div class="callout callout-success">
+                {{ message }}
+              </div>
+            {% elif message.extra_tags == 'error-edit-report' %}
+              <div class="callout callout-danger">
+                {{ message }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <!--end::Col-->
+        <!--begin::Col-->
+        <div class="col-12">
+          <div class="card card-primary card-outline mb-4">
+            <div class="card-body">
+              {% if fault.started_at == None %}
+                <p>
+                  <span class="badge bg-danger">Task not started yet</span>
+                </p>
+              {% else %}
+                <p>Estimated time {{ fault.deadline }} {% if fault.deadline_time_unit == 'H' %}Hour(s){% elif fault.deadline_time_unit == 'D' %}Day(s){% elif fault.deadline_time_unit == 'M' %}Month(s){% endif %}</p>
+                <p class="mb-1">Task started on {{ fault.started_at|date:'d F, Y' }} at {{ fault.started_at|date:'P' }}</p>
+                <p class="text-danger mb-3">Deadline on {{ deadline|date:'d F, Y' }} at {{ deadline|date:'P' }}</p>
+                {% if fault.completed_at != None %}
+                  <p class="mb-1">Completed on {{ fault.completed_at|date:'d F, Y' }} at {{ fault.completed_at|date:'P' }}</p>
+                  <p class="mb-3">Time taken {{ days_taken }} day(s) {{ hours_taken }} hour(s) {{ minutes_taken }} minute(s) {{ seconds_taken }} seconds</p>
+                  <p class="fw-bold {% if fault.is_late == True %}text-danger{% else %}text-success{% endif %}">{{ assessment }}</p>
+                {% endif %}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <!--end::Col-->
+        <!--begin::Col-->
+        <div class="col-md-6">
+          <!--begin::Quick Example-->
+          <div class="card card-primary card-outline mb-4">
+            <!--begin::Form-->
+            <form action="{% url 'edit-fault-report' %}" method="POST" onsubmit="hideButton('id-update-report','id-update-report-div')">
+              {% csrf_token %}
+              <!--begin::Body-->
+              <div class="card-body">
+                <input type="hidden" name="fault-report-id" value="{{ fault.id }}">
+                <div class="mb-3">
+                  {% for value, label in priority_levels %}
+                    {% if value == fault.priority_level %}
+                      <span class="badge bg-secondary">{{ label }}</span>
+                    {% endif %}
+                  {% endfor %}
+                  {% for value, label in statuses %}
+                    {% if value == fault.status %}
+                      <span class="badge bg-info">{{ label }}</span>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label mb-0">Job Type</label>
+                  <p class="mt-0">
+                    <span class="fw-bold">
+                      {% if fault.job_description != '' %}
+                        {{ fault.job_description }}
+                      {% else %}
+                        {{ fault.job.title }}
+                      {% endif %}
+                    </span>
+                  </p>
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Contact Name</label>
+                  <input required type="text" name="contact-name" value="{{ fault.contact_name }}" class="form-control" id=""
+                    aria-describedby="contactName" />
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Location</label>
+                  <input required type="text" name="location" value="{{ fault.location }}" class="form-control" id=""
+                    aria-describedby="location" disabled />
+                </div>
+                <div class="mb-3">
+                  <label for="exampleInputPassword1" class="form-label">Contact Phone</label>
+                  <input required type="text" name="contact-phone" value="{{ fault.contact_phone }}" class="form-control" id="">
+                </div>
+                <div class="mb-3">
+                  <label for="exampleInputPassword1" class="form-label">Contact Email</label>
+                  <input required type="text" name="contact-email" value="{{ fault.contact_email }}" class="form-control" id="">
+                </div>
+                <div class="mb-3">
+                  <label for="exampleInputPassword1" class="form-label">Description</label>
+                  <textarea required name="description" class="form-control" id="">{{ fault.description }}</textarea>
+                </div>
+                <div class="mb-3">
+                  <div class="container-fluid px-0">
+                    <div class="row">
+                      <label for="exampleInputPassword1" class="form-label">Attached Images</label>
+                      {% for image in fault.faultreportimage_set.all %}
+                        <div class="col-md-3">
+                          <img class="img img-fluid" src="/media/{{image.image}}" alt="">
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <div class="container-fluid px-0">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label for="exampleInputPassword1" class="form-label">Deadline</label>
+                        <input class="form-control" name="deadline" type="number" step="1" value="{{ fault.deadline }}">
+                      </div>
+                      <div class="col-md-6">
+                        <label for="exampleInputPassword1" class="form-label">Time Unit</label>
+                        <select class="form-control" name="deadline-time-unit" id="">
+                          {% for value, label in time_units %}
+                            <option value="{{value}}" {% if fault.deadline_time_unit == value %}selected{% endif %}>{{ label }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!--end::Body-->
+              <!--begin::Footer-->
+              {% if fault.status != 'C' %}
+                <div id="id-update-report-div" class="card-footer">
+                  <button id="id-update-report" type="submit" class="btn btn-primary">Update</button>
+                  {% if fault.status == 'S' or fault.status == 'QC' %}
+                    <a href="{% url 'create-quotation' faultReportId=fault.id %}" class="btn btn-primary">Create
+                      Quotation
+                    </a>
+                  {% endif %}
+                </div>
+              {% endif %}
+              <!--end::Footer-->
+            </form>
+            <!--end::Form-->
+          </div>
+          <!--end::Quick Example-->
+        </div>
+        <!--end::Col-->
+        <!--begin::Col-->
+        <div class="col-md-6">
+          <div class="card card-primary card-outline mb-4">
+            <div class="card-header">
+              <h3>Assign a technician</h3>
+            </div>
+            <form class="form-group" action="{% url 'assign-a-technician' %}" method="POST">
+              <div class="card-body">
+                {% csrf_token %}
+                {% for user in fault.user_technician.all %}
+                  {% if user.is_technician == True %}
+                    <div class="my-2">
+                      <p>Assigned to <span class="fw-bold">{{ user.first_name }} {{ user.last_name }}</span></p>
+                    </div>
+                  {% endif %}
+                {% endfor %}
+                <input type="hidden" name="fault-id" value="{{ fault.fault_id }}">
+                <select class="form-control" name="technician-id" id="">
+                  <option value="">Select a technician</option>
+                  {% for technician in technicians %}
+                  <option value="{{ technician.id }}" {% for user in fault.user_technician.all %}{% if user.id == technician.id %}selected{% endif %}{% endfor %}>{{ technician.first_name }} {{technician.last_name}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              {% if fault.status != 'C' %}
+                <div class="card-footer">
+                  <button type="submit" class="btn btn-primary">Assign</button>
+                </div>
+              {% endif %}
+            </form>
+          </div>
+          {% if fault.started_at == None %}
+            <div>
+              <a class="btn btn-primary form-control" href="{% url 'start-task' faultId=fault.fault_id %}">Start Task</a>
+            </div>
+          {% else %}
+            <div>
+              {% if fault.status == 'P' %}
+                <a class="btn btn-primary form-control" href="{% url 'resume-task' faultId=fault.fault_id %}">Resume</a>
+              {% elif fault.status == 'IP' %}
+                <a class="btn btn-primary form-control" href="{% url 'pause-task' faultId=fault.fault_id %}">Pause</a>
+              {% endif %}
+            </div>
+            {% if fault.status != 'C' %}
+              <div class="mt-2">
+                <a class="btn btn-primary form-control" href="{% url 'complete-task' faultId=fault.fault_id %}">Mark as complete</a>
+              </div>
+            {% endif %}
+          {% endif %}
+          </div>
+        <!--end::Col-->
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content-->
+</main>
+{% endblock %}

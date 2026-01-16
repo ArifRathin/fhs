@@ -1,0 +1,19 @@
+<html>
+    <head>
+        <title>Create Job</title>
+    </head>
+    <body>
+        <div>
+            <form action="{% url 'create-job' %}" method="POST">
+                {% csrf_token %}
+                <label for="">Title</label>
+                <input type="text" name="title">
+                <label for="">Description</label>
+                <textarea name="description" id=""></textarea>
+                <input type="radio" name="is-active" value="1" checked>Active
+                <input type="radio" name="is-active" value="0">Inactive
+                <button type="submit">Create</button>
+            </form>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,32 @@
+<html>
+    <head>
+        <title>Status List</title>
+    </head>
+    <body>
+        <div>
+            <table>
+                <tr>
+                    <th>Status</th>
+                    <th>Activity</th>
+                    <th>Action</th>
+                </tr>
+                {% for status in statuses %}
+                <tr>
+                    <td>{{ status.status }}</td>
+                    <td>
+                        {% if status.is_active == True %}
+                        Active
+                        {% else %}
+                        Inactive
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'edit-status' statusId=status.id %}">Edit</a>
+                        <a href="javascript.void(0)">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </body>
+</html>

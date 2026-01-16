@@ -1,0 +1,202 @@
+{% extends 'base-front-end/admin/base.html' %}
+{% block title %}
+  <title>Fault Reports</title>
+{% endblock %}
+{% block content %}
+<!--begin::App Main-->
+<main class="app-main">
+  <!--begin::App Content Header-->
+  <div class="app-content-header">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-sm-6">
+          <h3 class="mb-0">Fault Reports</h3>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Fault Reports</li>
+          </ol>
+        </div>
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content Header-->
+  <!--begin::App Content-->
+  <div class="app-content">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-md-12">
+          <!-- /.card -->
+          <div class="card mb-4">
+            <!-- /.card-header -->
+            <div class="card-body p-1">
+              <table id="id-fault-report" class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Reported By</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Date</th>
+                    <th>Job Type</th>
+                    {% if request.user.is_technician == False %}
+                    <th>Assigned To</th>
+                    <th class="noExport">Quotation</th>
+                    {% endif %}
+                    <th class="noExport">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for fault in faults %}
+                  <tr class="align-middle">
+                    <td>{{ fault.contact_name }}</td>
+                    <td>
+                      {% for value, label in statuses %}
+                        {% if fault.status == value %}
+                          {% if value == 'C' %}
+                            <span class="badge bg-success">{{ label }}</span>
+                          {% else %}
+                            <span class="badge bg-secondary">{{ label }}</span>
+                          {% endif %}
+                        {% endif %}
+                      {% endfor %}
+                    </td>
+                    <td>
+                      {% for value, label in priority_levels %}
+                        {% if fault.priority_level == value %}
+                          {% if value == 'L' %}
+                            <span class="badge bg-info">{{ label }}</span>
+                          {% elif value == 'M' %}
+                            <span class="badge bg-primary">{{ label }}</span>
+                          {% elif value == 'H' %}
+                            <span class="badge bg-warning">{{ label }}</span>
+                          {% elif value == 'U' %}
+                            <span class="badge bg-danger">{{ label }}</span>
+                          {% endif %}
+                        {% endif %}
+                      {% endfor %}
+                    </td>
+                    <td>
+                      {{ fault.created_at|date:'d M, Y' }}
+                    </td>
+                    <td>
+                      {% if fault.job_description != '' %}
+                        {{ fault.job_description }}
+                      {% else %}
+                        {{ fault.job.title }}
+                      {% endif %}
+                    </td>
+                    {% if request.user.is_technician == False %}
+                    <td>
+                      {% if fault.user_technician.all|length == 2 %}
+                        {% for user in fault.user_technician.all %}
+                          {% if user.is_technician == True %}
+                            {{ user.first_name }} {{ user.last_name }}
+                          {% endif %}
+                        {% endfor %}
+                      {% elif fault.user_technician.all|length == 1 %}
+                        {% for user in fault.user_technician.all %}
+                          {% if user.is_technician == True %}
+                            {{ user.first_name }} {{ user.last_name }}
+                          {% else %}
+                            <div class="badge bg-danger">Not yet assigned</div>
+                          {% endif %}
+                        {% endfor %}
+                      {% else %}
+                        <div class="badge bg-danger">Not yet assigned</div>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% for quote in fault.quotes.all %}
+                        {% if perms.quotation.view_quotation %}
+                          <a class="text-dark" href="{% url 'view-quotation' quoteRefNum=quote.quote_ref_num %}">Show</a>
+                        {% endif %}
+                      {% endfor %}
+                    </td>
+                    {% endif %}
+                    <td>
+                      <a class="btn btn-sm btn-primary" href="{% url 'fault-report-details' faultId=fault.fault_id %}">View Details</a>
+                      {% if request.user.is_admin == True and perms.fault_report.change_faultreport %}
+                        <a class="btn btn-sm btn-primary" href="{% url 'edit-fault-report' faultReportId=fault.id %}">Update</a>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <!-- /.card-body -->
+          </div>
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
+        <!-- /.col -->
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content-->
+</main>
+<!--end::App Main-->
+{% endblock %}
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script> -->
+<script src="https://cdn.datatables.net/2.3.5/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.3.5/js/dataTables.bootstrap5.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/3.0.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.html5.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.print.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.colVis.min.js"></script>
+<script type="text/javascript">
+  // new DataTable('#id-fault-report');
+  $(document).ready(function() {
+        $('#id-fault-report').DataTable({
+            ordering:false,
+            layout: {
+                topStart: {
+                    buttons: [
+                      {
+                        extend: 'pdfHtml5',
+                        exportOptions: {
+                          columns: ':not(.noExport)'
+                        }
+                      },
+                      {
+                        extend: 'csv',
+                        exportOptions: {
+                          columns: ':not(.noExport)'
+                        }
+                      },
+                      {
+                        extend: 'excel',
+                        exportOptions: {
+                          columns: ':not(.noExport)'
+                        }
+                      },
+                      {
+                        extend: 'print',
+                        exportOptions: {
+                          columns: ':not(.noExport)'
+                        }
+                      }
+                    ]
+                }
+            },
+            exportOptions: {
+            columns: ':not(.noExport)' // Excludes columns with the 'noExport' class
+        },
+        });
+    });
+</script>
+{% endblock %}

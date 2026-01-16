@@ -1,0 +1,17 @@
+<html>
+    <head>
+        <title>Admin Log In</title>
+    </head>
+    <body>
+        <div>
+            <form action="{% url 'login-admin' %}" method="POST">
+                {% csrf_token %}
+                <label for="">Email</label>
+                <input type="text" name="email">
+                <label for="">Password</label>
+                <input type="password" name="password">
+                <button type="submit">Log In</button>
+            </form>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,32 @@
+<html>
+    <head>
+        <title>Priority Level List</title>
+    </head>
+    <body>
+        <div>
+            <table>
+                <tr>
+                    <th>Level</th>
+                    <th>Activity</th>
+                    <th>Action</th>
+                </tr>
+                {% for level in priority_levels %}
+                <tr>
+                    <td>{{ level.level }}</td>
+                    <td>
+                        {% if level.is_active == True %}
+                        Active
+                        {% else %}
+                        Inactive
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'edit-priority-level' levelId=level.id %}">Edit</a>
+                        <a href="javascript.void(0)">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </body>
+</html>

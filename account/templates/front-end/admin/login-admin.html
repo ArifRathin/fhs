@@ -1,0 +1,32 @@
+{% extends 'base-front-end/admin/login-register-base.html' %}
+{% block content %}
+<p class="register-box-msg">Log In</p>
+<form action="{% url 'login-user' %}" method="post" onsubmit="hideButton('id-log-in', 'id-log-in-div')">
+    {% csrf_token %}
+    <div class="input-group mb-1">
+        <div class="form-floating">
+            <input required id="registerEmail" type="email" name="email" class="form-control" placeholder="" />
+            <label for="registerEmail">Email</label>
+        </div>
+        <div class="input-group-text"><span class="bi bi-envelope"></span></div>
+    </div>
+    <div class="input-group mb-1">
+        <div class="form-floating">
+            <input required id="registerPassword" type="password" name="password" class="form-control" placeholder="" />
+            <label for="registerPassword">Password</label>
+        </div>
+        <div class="input-group-text"><span class="bi bi-lock-fill"></span></div>
+    </div>
+    <!--begin::Row-->
+    <div class="row">
+        <!-- /.col -->
+        <div class="col-4">
+            <div id="id-log-in-div" class="d-grid gap-2">
+                <button id="id-log-in" type="submit" class="btn btn-primary">Log In</button>
+            </div>
+        </div>
+        <!-- /.col -->
+    </div>
+    <!--end::Row-->
+</form>
+{% endblock %}

@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <title>Create New Admin</title>
+    </head>
+    <body>
+        <div>
+            <form action="{% url 'create-admin' %}" method="POST">
+                {% csrf_token %}
+                <label for="">First name</label>
+                <input type="text" name="first-name">
+                <label for="">Last Name</label>
+                <input type="text" name="last-name">
+                <label for="">Email</label>
+                <input type="text" name="email">
+                <label for="">Phone</label>
+                <input type="text" name="phone">
+                <label for="">Password</label>
+                <input type="password" name="password">
+                <label for="">Retype Password</label>
+                <input type="password" name="retype-password">
+                <button type="submit">Create</button>
+            </form>
+        </div>
+    </body>
+</html>

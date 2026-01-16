@@ -1,0 +1,57 @@
+{% extends 'base-front-end/enduser/base.html' %}
+{% block title %}
+    <title>{{ page_ }}</title>
+{% endblock %}
+{% load static %}
+{% block content %}
+<div class="row bg-secondary-subtle">
+    <div class="col-md-6 my-3 rounded bg-white mx-auto">
+        <h3 class="text-center">Report A Fault</h3>
+        <form class="form-group" action="{% url 'create-fault-report' %}" method="POST" enctype="multipart/form-data" onsubmit="hideButton('id-submit-report', 'id-submit-report-div')">
+            {% csrf_token %}
+            <div class="col-12">
+          {% for message in messages %}
+            {% if message.extra_tags == 'success-create-report' %}
+              <div class="alert text-white bg-success">
+                {{ message }}
+              </div>
+            {% elif message.extra_tags == 'error-create-report' %}
+              <div class="alert text-white bg-danger">
+                {{ message }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+            <label class="fw-bold" for="">Your name</label>
+            <input class="form-control" name="contact-name" type="text" {% if request.user.is_authenticated %} value="{{ request.user.first_name }} {{ request.user.last_name }}" {% endif %}>
+            <label class="fw-bold" for="">Your phone</label>
+            <input required class="form-control" name="contact-phone" type="text" {% if request.user.is_authenticated %}value="{{ request.user.phone }}" {% endif %}>
+            <label class="fw-bold" for="">Your email</label>
+            <input required class="form-control" name="contact-email" type="text" {% if request.user.is_authenticated %}value="{{ request.user.email }}" disabled {% endif %}>
+            <label class="fw-bold" for="">Description</label>
+            <textarea required class="form-control" name="description" id=""></textarea>
+            <label class="fw-bold" for="">Images (You can choose multiple if you want)</label>
+            <input class="form-control" name="images" type="file" multiple="true">
+            <label class="fw-bold" for="">Location</label>
+            <input required class="form-control" name="location" type="text">
+            <label class="fw-bold" for="">Job type</label>
+            <select class="form-control" name="job-type" id="">
+                {% for job in jobs %}
+                <option value="{{ job.id }}">{{ job.title }}</option>
+                {% endfor %}
+            </select>
+            <label class="text-muted" for="">Or (If the job type is not in the list)</label>
+            <textarea class="form-control" name="job-type-text" id=""></textarea>
+            <label class="fw-bold" for="">Priority Level</label>
+            <select class="form-control" name="priority-level" id="">
+                {% for value, label in priority_levels %}
+                <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+            <div id="id-submit-report-div" class="mt-2 text-center">
+              <button id="id-submit-report" class="btn btn-primary form-control" type="submit">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

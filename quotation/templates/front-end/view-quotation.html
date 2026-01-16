@@ -1,0 +1,112 @@
+{% extends 'base-front-end/enduser/base.html' %}
+{% load static %}
+{% load math_filters %}
+{% block title %}
+    <title>Client Quotation</title>
+{% endblock %}
+{% block content %}
+        <div class="row mt-2">
+            <div class="col-12">
+                {% for message in messages %}
+                    {% if message.extra_tags == 'success-update-quotation' %}
+                        <div class="callout callout-success">
+                            {{ message }}
+                        </div>
+                    {% elif message.extra_tags == 'error-update-quotation' %}
+                        <div class="callout callout-danger">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="col-md-6 text-start">
+                <h5>FHS Facilities</h5>
+                <span>31 Dinnath Sen Road, Gandaria, Dhaka-1204</span>
+            </div>
+            <div class="col-md-6 text-end">
+                <img class="img img-fluid" src="/media/{{ front_page.logo }}" alt="" style="width:50px;">
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-6 text-start">
+                <span class="h5">To</span><br>
+                <span>{{ quotation.fault_report.contact_name }}</span><br>
+                <span>{{ quotation.fault_report.contact_email }}</span><br>
+                <span>{{ quotation.fault_report.contact_phone }}</span><br>
+            </div>
+            <div class="col-md-6 text-end">
+                <span class="h5">Ref# {{ quotation.quote_ref_num }}</span><br>
+                <span class="h6">{{ quotation.created_at|date:"d F, Y" }}</span><br>
+                {% if quotation.payment_status == 'U' %}
+                <span class="h5 fw-bold text-danger">UNPAID</span><br>
+                {% else %}
+                <span class="h5 fw-bold text-success">PAID</span><br>
+                {% endif %}
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table">
+                        <thead>
+                            <th>Description</th>
+                            <th>Price per unit</th>
+                            <th>Total units</th>
+                            <th>Price</th>
+                        </thead>
+                        <tbody>
+                            {% for bill in quotation.bills.all %}
+                            <tr>
+                                <td>{{ bill.service_name }}</td>
+                                <td>{{ bill.price_per_unit }}</td>
+                                <td>{{ bill.total_units }}</td>
+                                <td>{{ bill.price_per_unit|multiplyFloats:bill.total_units }}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr>
+                                <td><span class="fw-bold">Subtotal</span></td>
+                                <td></td>
+                                <td></td>
+                                <td>{{ quotation.sub_total_bill }}</td>
+                            </tr>
+                            <tr>
+                                <td><span class="fw-bold">Sales tax</span></td>
+                                <td></td>
+                                <td></td>
+                                <td>{{ quotation.sales_tax }}%</td>
+                            </tr>
+                            <tr>
+                                <td><span class="fw-bold">Total</span></td>
+                                <td></td>
+                                <td></td>
+                                <td>{{ quotation.total_bill }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-12 mb-2">
+                    <span class="h6">Estimated time: {{ quotation.fault_report.deadline }} {% if quotation.fault_report.deadline_time_unit == 'H' %}Hour(s){% elif quotation.fault_report.deadline_time_unit == 'D' %}Day(s){% elif quotation.fault_report.deadline_time_unit == 'M' %}Month(s){% endif %}</span><br>
+                </div>
+                <div class="col-md-12">
+                    Approval status:
+                    {% if quotation.approval_status == 'QA' %}
+                    <span class="text-success">Approved</span>
+                    {% elif quotation.approval_status == 'QP' %}
+                    <span class="text-primary">Pending</span>
+                    {% elif quotation.approval_status == 'QD' %}
+                    <span class="text-warning">Disapproved</span>
+                    {% elif quotation.approval_status == 'QC' %}
+                    <span class="text-danger">Cancelled</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-12 text-end">
+                    {% if quotation.fault_report.status == 'QS' %}
+                        <a class="btn btn-primary" href="{% url 'update-client-approval-status' quoteRefNum=quotation.quote_ref_num approvalStatus='QA' %}">Approve</a>
+                        <!-- <a class="btn btn-primary" href="{% url 'update-client-approval-status' quoteRefNum=quotation.quote_ref_num approvalStatus='QD' %}">Disapprove</a> -->
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+{% endblock %}

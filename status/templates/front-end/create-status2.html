@@ -1,0 +1,18 @@
+<html>
+    <head>
+        <title>Create Status</title>
+    </head>
+    <body>
+        <div>
+            <form action="{% url 'create-status' %}" method="POST">
+                {% csrf_token %}
+                <label for="">Status</label>
+                <input type="text" name="status">
+                <input type="radio" name="is-active" checked value="1">Active
+                <input type="radio" name="is-active" value="0">Inactive
+                <button type="submit">Create</button>
+            </form>
+        </div>
+
+    </body>
+</html>

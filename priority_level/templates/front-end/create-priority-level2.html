@@ -1,0 +1,17 @@
+<html>
+    <head>
+        <title>Create Priority Level</title>
+    </head>
+    <body>
+        <div>
+            <form action="{% url 'create-priority-level' %}" method="POST">
+                {% csrf_token %}
+                <label for="Lavel">Level</label>
+                <input type="text" name="level">
+                <input type="radio" name="is_active" value="1" checked>Active
+                <input type="radio" name="is_active" value="0">Inactive
+                <button type="submit">Create</button>
+            </form>
+        </div>
+    </body>
+</html>

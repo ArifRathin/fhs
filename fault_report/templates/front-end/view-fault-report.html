@@ -1,0 +1,212 @@
+{% extends 'base-front-end/admin/base.html' %}
+{% load static %}
+{% block title %}
+    <title>Fault Report</title>
+{% endblock %}
+{% block content %}
+<!--begin::App Main-->
+<main class="app-main">
+  <!--begin::App Content Header-->
+  <div class="app-content-header">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-sm-6">
+          <h3 class="mb-0">Fault Report</h3>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Fault report</li>
+          </ol>
+        </div>
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content Header-->
+  <!--begin::App Content-->
+  <div class="app-content">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-md-12">
+          <!-- /.card -->
+          <div class="card mb-4">
+            <!-- /.card-header -->
+            <div class="card-body p-0">
+              <div class="container-fluid">
+                <div class="row">
+                    <p>Report submitted on <span class="fw-bold">{{ fault_report.created_at|date:'d F, Y' }} at {{ fault_report.created_at|date:'P' }}</span></p>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        {% for value, label in priority_levels %}
+                            {% if value == fault_report.priority_level %}
+                                {% if value == 'U' %}
+                                    <span class="badge bg-danger">{{ label }}</span>
+                                {% elif value == 'H' %}
+                                    <span class="badge bg-warning">{{ label }}</span>
+                                {% elif value == 'M' %}
+                                    <span class="badge bg-primary">{{ label }}</span>
+                                {% elif value == 'L' %}
+                                    <span class="badge bg-info">{{ label }}</span>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6 text-end">
+                        {% for value, label in statuses %}
+                            {% if value == fault_report.status %}
+                                {% if fault_report.status == 'C' %}
+                                    <span class="badge bg-success">{{ label }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ label }}</span>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <p class="fw-bold mb-0">Job Type</p>
+                    <span>
+                        {% if fault_report.job_description != '' %}
+                            {{ fault_report.job_description }}
+                        {% else %}
+                            {{ fault_report.job.title }}
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="row mt-2">
+                    <p class="fw-bold mb-0">Estimated Time</p>
+                    <span>{{ fault_report.deadline }} {% if fault_report.deadline_time_unit == 'H' %}Hour{% if fault_report.deadline > 1 %}s{% endif %}{% elif fault_report.deadline_time_unit == 'D' %}Day{% if fault_report.deadline > 1 %}s{% endif %}{% endif %}</span>
+                </div>
+                <div class="row mt-2">
+                    <p class="fw-bold mb-0">Assigned To</p>
+                    <span> 
+                        {% if fault_report.user_technician.all|length == 2 %}
+                            {% for user in fault_report.user_technician.all %}
+                                {% if user.is_technician == True %}
+                                    {{ user.first_name }} {{ user.last_name }}
+                                {% endif %}
+                            {% endfor %}
+                        {% elif fault_report.user_technician.all|length == 1 %}
+                            {% for user in fault_report.user_technician.all %}
+                                {% if user.is_technician == True %}
+                                    {{ user.first_name }} {{ user.last_name }}
+                                {% else %}
+                                    <div class="badge bg-danger">Not yet assigned</div>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <div class="badge bg-danger">Not yet assigned</div>
+                        {% endif %}
+                    </span>
+                </div>
+                {% if fault_report.started_at != None %}
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <p class="fw-bold mb-0">Task Started On</p>
+                            <span>{{ fault_report.started_at|date:'d F, Y' }} at {{ fault_report.started_at|date:'P' }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="fw-bold mb-0 text-danger">Deadline</p> 
+                            <span class="fw-bold">{{ deadline|date:'d F, Y' }} at {{ deadline|date:'P' }}</span>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if fault_report.completed_at != None %}
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <p class="fw-bold mb-0">Completed On</p>
+                            <span>{{ fault_report.completed_at|date:'d F, Y' }} at {{ fault_report.completed_at|date:'P' }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="fw-bold mb-0">Time Taken</p>
+                            <span>
+                                {% if days_taken > 0 %}
+                                    {{ days_taken }} day{% if days_taken > 1 %}s{% endif %}
+                                {% endif %}
+                                {% if days_taken > 0 or hours_taken > 0 %}
+                                    {{ hours_taken }} hour{% if hours_taken > 1 %}s{% endif %}
+                                {% endif %}
+                                {% if days_taken > 0 or hours_taken > 0 or minutes_taken > 0 %}
+                                    {{ minutes_taken }} minute{% if minutes_taken > 1 %}s{% endif %}
+                                {% endif %}
+                                {% if days_taken > 0 or hours_taken > 0 or minutes_taken > 0 or seconds_taken > 0 %}
+                                    {{ seconds_taken }} second{% if seconds_taken > 1 %}s{% endif %}
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <p class="fw-bold mb-0">Assessment</p>
+                        {% if fault_report.is_late == True %}
+                            <span class="text-danger fw-bold">{{ assessment }}</span>
+                        {% else %}
+                            <span class="text-success fw-bold">{{ assessment }}</span>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <p class="fw-bold mb-0">Contact Name</p>
+                        <span>{{ fault_report.contact_name }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="fw-bold mb-0">Contact Phone</p>
+                        <span>{{ fault_report.contact_phone }}</span>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-6 mb-0">
+                        <p class="fw-bold mb-0">Contact Email</p> 
+                        <span>{{ fault_report.contact_email }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="fw-bold mb-0">Location</p> 
+                        <span>{{ fault_report.location }}</span>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <p class="fw-bold mb-0">Description</p>
+                    <span>{{ fault_report.description }}</span>
+                </div>
+                <div class="row mt-2">
+                    <p class="fw-bold mb-0">Attached Images</p>
+                    {% for image in fault_report.faultreportimage_set.all %}
+                        <div class="col-md-2 my-2">
+                            <img class="img img-fluid" src="/media/{{image.image}}" alt="">
+                        </div>
+                    {% endfor %}
+                </div>
+              </div>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer text-end">
+                {% if request.user.is_admin == True and perms.fault_report.change_faultreport %}
+                    <a class="btn btn-primary" href="{% url 'edit-fault-report' faultReportId=fault_report.id %}">Update</a>
+                {% endif %}
+                {% for quote in fault_report.quotes.all %}
+                    {% if quote.approval_status != 'QC' and request.user.is_technician == False %}
+                        <a href="{% url 'view-quotation' quoteRefNum=quote.quote_ref_num %}" class="btn btn-primary">View Quotation</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+          </div>
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
+        <!-- /.col -->
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content-->
+</main>
+<!--end::App Main-->
+{% endblock %}

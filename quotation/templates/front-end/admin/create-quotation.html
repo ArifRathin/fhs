@@ -1,0 +1,173 @@
+{% extends 'base-front-end/admin/base.html' %}
+{% load static %}
+{% block content %}
+<!--begin::App Main-->
+<main class="app-main">
+  <!--begin::App Content Header-->
+  <div class="app-content-header">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-sm-6">
+          <h3 class="mb-0">Create Quotation</h3>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Create Quotation</li>
+          </ol>
+        </div>
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content Header-->
+  <!--begin::App Content-->
+  <div class="app-content">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row g-4">
+        <!--begin::Col-->
+        <div class="col-12">
+          {% for message in messages %}
+            {% if message.extra_tags == 'success-create-quotation' %}
+              <div class="callout callout-success">
+                {{ message }}
+              </div>
+            {% elif message.extra_tags == 'error-create-quotation' %}
+              <div class="callout callout-danger">
+                {{ message }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <!--end::Col-->
+        <!--begin::Col-->
+        <div class="col-md-12">
+          <!--begin::Quick Example-->
+          <div class="card card-primary card-outline mb-4">
+            <!--begin::Form-->
+            <form action="{% url 'create-quotation' %}" method="POST">
+              {% csrf_token %}
+              <input type="hidden" name="fault-report-id" value="{{ faultReportId }}">
+              <!--begin::Body-->
+              <div class="card-body">
+                <div class="container-fluid" id="id-item">
+                  <div class="row" id="id-row1">
+                    <div class="col-md-4">
+                      <textarea type="text" name="description" class="form-control" placeholder="Description"></textarea>
+                    </div>
+                    <div class="col-md-2">
+                      <input type="number" step="0.01" name="price-per-unit" class="form-control" id="id-ppu1" placeholder="Price per unit" onkeyup="calculate(0,1)">
+                    </div>
+                    <div class="col-md-2">
+                      <input type="number" step="0.01" name="total-units" class="form-control" id="id-tu1" placeholder="Total units" onkeyup="calculate(0,1)">
+                    </div>
+                    <div class="col-md-2">
+                      <input type="number" step="0.01" class="form-control" id="id-price1" placeholder="Price" disabled>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!--end::Body-->
+              <!--begin::Footer-->
+              <div class="card-footer">
+                <div>
+                  <h6>Sales Tax(%)</h6>
+                  <input type="number" step="0.001" name="sales-tax" class="form-control" id="id-sales-tax" value="0" onkeyup="calculate(1,0)">
+                </div>
+                <hr>
+                <div>
+                  <input type="hidden" id="id-sub-total-price-val" value="0">
+                  <span class="h6">Subtotal <span class="fw-bold" id="id-sub-total-price">0</span></span>
+                </div>
+                <hr>
+                <div>
+                  <span class="h6s">Total <span class="fw-bold" id="id-total-price">0</span></span>
+                </div>
+                <hr>
+                <button type="button" class="btn btn-primary" onclick="addNewRow()">Add New Row</button>
+                <button type="submit" class="btn btn-primary">Create Quotation</button>
+              </div>
+              <!--end::Footer-->
+            </form>
+            <!--end::Form-->
+          </div>
+          <!--end::Quick Example-->
+        </div>
+        <!--end::Col-->
+        <!--begin::Col-->
+        <div class="col-md-6">
+        </div>
+        <!--end::Col-->
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content-->
+</main>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'js/admin/jquery.min.js' %}"></script>
+<script>
+  var totalRows = 1;
+  var currSerial = 1
+  var rowsArr = [1]
+  function addNewRow(){
+    currSerial += 1;
+    $('#id-item').append('<div class="row mt-1" id="id-row'+currSerial+'"><div class="col-md-4"><textarea type="text" name="description" class="form-control" placeholder="Description"></textarea></div><div class="col-md-2"><input type="text" name="price-per-unit" class="form-control" id="id-ppu'+currSerial+'" placeholder="Price per unit" onkeyup="calculate(0,'+currSerial+')"></div><div class="col-md-2"><input type="text" name="total-units" class="form-control" id="id-tu'+currSerial+'" placeholder="Total units" onkeyup="calculate(0,'+currSerial+')"></div><div class="col-md-2"><input type="text" class="form-control" id="id-price'+currSerial+'" placeholder="Price" onkeyup="calculate('+currSerial+')" disabled></div><div class="col-md-2" id="id-rmv-btn'+currSerial+'"><button type="button" class="btn btn-sm btn-danger" onclick="removeRow('+currSerial+')">Remove</button></div></div>');
+    if(totalRows == 1){
+      $('#id-row'+rowsArr[0]).append('<div class="col-md-2" id="id-rmv-btn'+rowsArr[0]+'"><button type="button" class="btn btn-sm btn-danger" onclick="removeRow('+rowsArr[0]+')">Remove</button></div>')
+    }
+    rowsArr.push(currSerial)
+    totalRows += 1;
+  }
+
+  function removeRow(rowNum){
+    alert(rowNum);
+    $('#id-row'+rowNum).remove();
+    itemIndex = rowsArr.indexOf(rowNum);
+    if(itemIndex > -1){
+      rowsArr.splice(itemIndex, 1);
+    }
+    totalRows -= 1;
+    alert(totalRows);
+    alert(rowsArr[0]);
+    if(totalRows==1){
+      $('#id-rmv-btn'+rowsArr[0]).remove();
+    }
+  }
+
+  function calculate(fromSalesTax=0, serialNum=0){
+    if(fromSalesTax == 0){
+      var ppu = $('#id-ppu'+serialNum).val();
+      var tu = $('#id-tu'+serialNum).val();
+      if(ppu !== '' && tu !== ''){
+        let price = ppu * tu;
+        $('#id-price'+serialNum).val(price);
+        let subtotalPrice = 0.0;
+        $.each(rowsArr, function(index, value){
+          if($('#id-price'+value).val() !== ''){
+            subtotalPrice += Number($('#id-price'+value).val());
+          }
+        });
+        $('#id-sub-total-price').html(subtotalPrice);
+        $('#id-sub-total-price-val').val(subtotalPrice);
+        salesTax = $('#id-sales-tax').val();
+        totalPrice = subtotalPrice+((subtotalPrice*salesTax)/100);
+        $('#id-total-price').html(totalPrice);
+      }
+    }
+    else{
+      subtotalPrice = Number($('#id-sub-total-price-val').val());
+      salesTax = Number($('#id-sales-tax').val());
+      totalPrice = subtotalPrice+((subtotalPrice*salesTax)/100);
+      $('#id-total-price').html(totalPrice);
+    }
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends 'base-front-end/admin/base.html' %}
+{% block title %}
+  <title>{{ page_ }}</title>
+{% endblock %}
+{% block content %}
+<!--begin::App Main-->
+<main class="app-main">
+  <!--begin::App Content Header-->
+  <div class="app-content-header">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-sm-6">
+          <h3 class="mb-0">{{ page_ }}</h3>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Job List</li>
+          </ol>
+        </div>
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content Header-->
+  <!--begin::App Content-->
+  <div class="app-content">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-md-6">
+          <!-- /.card -->
+          <div class="card mb-4">
+            <!-- /.card-header -->
+            <div class="card-body p-0">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Activity</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for job in jobs %}
+                  <tr class="align-middle">
+                    <td>{{ job.title }}</td>
+                    <td>
+                      {% if job.description != None %}
+                        {{ job.description }}
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if job.is_active == True %}
+                        <div class="badge bg-success">Active</div>
+                      {% else %}
+                        <div class="badge bg-info">Inactive</div>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if perms.job.change_job %}
+                        <a class="btn btn-sm btn-primary" href="{% url 'edit-job' jobId=job.id %}">Edit</a>
+                      {% endif %}
+                      <!-- <a class="btn btn-sm btn-danger" href="">Delete</a> -->
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <!-- /.card-body -->
+          </div>
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
+        <!-- /.col -->
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content-->
+</main>
+<!--end::App Main-->
+{% endblock %}

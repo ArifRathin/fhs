@@ -1,0 +1,18 @@
+<html>
+    <head>
+        <title>Edit Priority Level</title>
+    </head>
+    <body>
+        <div>
+            <form action="{% url 'edit-priority-level' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="level-id" value="{{level.id}}">
+                <label for="">level</label>
+                <input type="text" name="level" value="{{ level.level }}">
+                <input type="radio" name="is-active" value="1" {% if level.is_active == True %}checked{% endif %}>Active
+                <input type="radio" name="is-active" value="0" {% if level.is_active == False %}checked{% endif %}>Inactive
+                <button type="submit">Update</button>
+            </form>
+        </div>
+    </body>
+</html>

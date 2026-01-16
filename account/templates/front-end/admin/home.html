@@ -1,0 +1,235 @@
+{% extends 'base-front-end/admin/base.html' %}
+{% block content %}
+<!--begin::App Main-->
+<main class="app-main">
+    <!--begin::App Content Header-->
+    <div class="app-content-header">
+        <!--begin::Container-->
+        <div class="container-fluid">
+            <!--begin::Row-->
+            <div class="row">
+                <div class="col-sm-6">
+                    {% if request.user.is_admin %}
+                        <h3 class="mb-0">Admin Dashboard</h3>
+                    {% elif request.user.is_technician %}
+                        <h3 class="mb-0">Technician Dashboard</h3>
+                    {% elif request.user.is_enduser %}
+                        <h3 class="mb-0">User Dashboard</h3>
+                    {% endif %}
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-end">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">
+                            {% if request.user.is_admin %}
+                                Admin Dashboard
+                            {% elif request.user.is_technician %}
+                                Technician Dashboard
+                            {% elif request.user.is_enduser %}
+                                User Dashboard
+                            {% endif %}
+                        </li>
+                    </ol>
+                </div>
+            </div>
+            <!--end::Row-->
+        </div>
+        <!--end::Container-->
+    </div>
+    <div class="app-content">
+        <!--begin::Container-->
+        <div class="container-fluid">
+            <!-- Info boxes -->
+            <div class="row">
+                {% if request.user.is_admin %}
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="info-box">
+                        <span class="info-box-icon text-bg-primary shadow-sm">
+                            <i class="bi bi-file-earmark-fill"></i>
+                        </span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Total faults reported</span>
+                            <span class="info-box-number">
+                                {{ total_faults_reported }}
+                            </span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
+                    <!-- /.info-box -->
+                </div>
+                <!-- /.col -->
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="info-box">
+                        <span class="info-box-icon text-bg-secondary shadow-sm">
+                            <i class="bi bi-clock-fill"></i>
+                        </span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Average completion time</span>
+                            <span class="info-box-number">
+                                {% if days_taken_avg > 0 %}
+                                    {{ days_taken_avg }} day{% if days_taken_avg > 1 %}s{% endif %}
+                                {% endif %}
+                                {% if days_taken_avg > 0 or hours_taken_avg > 0 %}
+                                    {{ hours_taken_avg }} hour{% if hours_taken_avg > 1 %}s{% endif %}
+                                {% endif %}
+                                {% if days_taken_avg > 0 or hours_taken_avg > 0 or minutes_taken_avg > 0 %}
+                                    {{ minutes_taken_avg }} minute{% if minutes_taken_avg > 1 %}s{% endif %}
+                                {% endif %}
+                                {% if days_taken_avg > 0 or hours_taken_avg > 0 or minutes_taken_avg > 0 or seconds_taken_avg > 0 %}
+                                    {{ seconds_taken_avg }} second{% if seconds_taken_avg > 1 %}s{% endif %}
+                                {% endif %}
+                            </span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
+                    <!-- /.info-box -->
+                </div>
+                <!-- /.col -->
+                <!-- fix for small devices only -->
+                <!-- <div class="clearfix hidden-md-up"></div> -->
+                
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="info-box">
+                        <span class="info-box-icon text-bg-danger shadow-sm">
+                            <i class="bi bi-calendar-check"></i>
+                        </span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Urgent jobs completed on time</span>
+                            <span class="info-box-number">{{ urge_com_on_time_perc }}%</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
+                    <!-- /.info-box -->
+                </div>
+                <!-- /.col -->
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="info-box">
+                        <span class="info-box-icon text-bg-success shadow-sm">
+                            <i class="bi bi-calendar2-check-fill"></i>
+                        </span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">SLA deadline compliance</span>
+                            <span class="info-box-number">{{ total_comp_on_time_perc }}%</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
+                    <!-- /.info-box -->
+                </div>
+                {% elif request.user.is_technician %}
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="info-box">
+                        <span class="info-box-icon text-bg-primary shadow-sm">
+                            <i class="bi bi-file-earmark"></i>
+                        </span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Total tasks assigned</span>
+                            <span class="info-box-number">{{ total_tasks_assigned }}</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
+                    <!-- /.info-box -->
+                </div>
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="info-box">
+                        <span class="info-box-icon text-bg-success shadow-sm">
+                            <i class="bi bi-calendar2-check"></i>
+                        </span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Total tasks completed</span>
+                            <span class="info-box-number">{{ total_tasks_completed }}</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
+                    <!-- /.info-box -->
+                </div>
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="info-box">
+                        <span class="info-box-icon text-bg-info shadow-sm">
+                            <i class="bi bi-calendar2-check-fill"></i>
+                        </span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Completion percentage</span>
+                            <span class="info-box-number">{{ completion_percentage }}%</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
+                    <!-- /.info-box -->
+                </div>
+                {% elif request.user.is_enduser %}
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="info-box">
+                        <span class="info-box-icon text-bg-primary shadow-sm">
+                            <i class="bi bi-file-earmark"></i>
+                        </span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Total fault reports</span>
+                            <span class="info-box-number">{{ total_fault_reports }}</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
+                    <!-- /.info-box -->
+                </div>
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="info-box">
+                        <span class="info-box-icon text-bg-success shadow-sm">
+                            <i class="bi bi-calendar2-check"></i>
+                        </span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Total completed</span>
+                            <span class="info-box-number">{{ total_completed }}</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
+                    <!-- /.info-box -->
+                </div>
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="info-box">
+                        <span class="info-box-icon text-bg-info shadow-sm">
+                            <i class="bi bi-calendar2-check-fill"></i>
+                        </span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Completion percentage</span>
+                            <span class="info-box-number">{{ total_comp_percentage }}%</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
+                    <!-- /.info-box -->
+                </div>
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="info-box">
+                        <span class="info-box-icon text-bg-info shadow-sm">
+                            <i class="bi bi-clock"></i>
+                        </span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Completed on time</span>
+                            <span class="info-box-number">{{ comp_on_time }}</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
+                    <!-- /.info-box -->
+                </div>
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="info-box">
+                        <span class="info-box-icon text-bg-info shadow-sm">
+                            <i class="bi bi-clock-fill"></i>
+                        </span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Completed on time percentage</span>
+                            <span class="info-box-number">{{ comp_on_time_percentage }}%</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
+                    <!-- /.info-box -->
+                </div>
+                {% endif %}
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!--end::Row-->
+        </div>
+        <!--end::Container-->
+    </div>
+    <!--end::App Content-->
+</main>
+<!--end::App Main-->
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends 'base-front-end/admin/base.html' %}
+{% block title %}
+    <title>{{ page_ }}</title>
+{% endblock %}
+{% block content %}
+<!--begin::App Main-->
+<main class="app-main">
+  <!--begin::App Content Header-->
+  <div class="app-content-header">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-sm-6">
+          <h3 class="mb-0">{{ page_ }}</h3>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ page_ }}</li>
+          </ol>
+        </div>
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content Header-->
+  <!--begin::App Content-->
+  <div class="app-content">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row g-4">
+        <!--begin::Col-->
+        <div class="col-12">
+          {% for message in messages %}
+            {% if message.extra_tags == 'success-update-fp' %}
+              <div class="callout callout-success">
+                {{ message }}
+              </div>
+            {% elif message.extra_tags == 'error-update-fp' %}
+              <div class="callout callout-danger">
+                {{ message }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <!--end::Col-->
+        <!--begin::Col-->
+        <div class="col-md-6">
+          <!--begin::Quick Example-->
+          <div class="card card-primary card-outline mb-4">
+            <!--begin::Form-->
+            <form action="{% url 'update-front-page' %}" method="POST" enctype="multipart/form-data">
+              {% csrf_token %}
+              <!--begin::Body-->
+              <div class="card-body">
+                <div class="mb-3">
+                  <label for="" class="form-label">Logo</label>
+                  <img class="img img-fluid my-2" style="width:80px;" src="/media/{{ front_page.logo }}" alt="">
+                  <input type="file" name="logo" class="form-control" id="" aria-describedby="logo" />
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Banner Image</label>
+                  <img class="img img-fluid my-2" style="width:80px;" src="/media/{{ front_page.banner_image }}" alt="">
+                  <input type="file" name="banner-image" class="form-control" id="" aria-describedby="bannerImage" />
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Contact Email</label>
+                  <input type="text" value="{{ front_page.contact_email }}" name="contact-email" class="form-control" id="" aria-describedby="contactEmail" />
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Contact Phone</label>
+                  <input type="text" value="{{ front_page.contact_phone }}" name="contact-phone" class="form-control" id="" aria-describedby="contactPhone" />
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Contact Address</label>
+                  <textarea name="contact-address" class="form-control" id="" aria-describedby="contactAddress">{{ front_page.contact_address }}</textarea>
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">About Us</label>
+                  <textarea type="text" name="about-us" class="form-control" id="" aria-describedby="aboutUs">{{ front_page.about_us }}</textarea>
+                </div>
+              </div>
+              <!--end::Body-->
+              <!--begin::Footer-->
+              <div class="card-footer">
+                <button type="submit" class="btn btn-primary">Update</button>
+              </div>
+              <!--end::Footer-->
+            </form>
+            <!--end::Form-->
+          </div>
+          <!--end::Quick Example-->
+        </div>
+        <!--end::Col-->
+        <!--begin::Col-->
+        <div class="col-md-6">
+        </div>
+        <!--end::Col-->
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content-->
+</main>
+{% endblock %}

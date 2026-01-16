@@ -1,0 +1,57 @@
+{% load static %}
+<html>
+    <head>
+        {% block title %}
+        {% endblock %}
+        <link rel="stylesheet" href="{% static 'css/front-end/bootstrap.min.css' %}">
+        <link rel="stylesheet" href="cdn.jsdelivr.net">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <div class="container-fluid">
+            <div class="row bg-primary bg-gradient shadow-lg" style="height:50px;">
+                <div class="col-4 col-md-6">
+                    <a href="{% url 'landing-page' %}">
+                        <img class="img img-fluid mt-1" src="/media/{{ front_page.logo }}" style="height:40px;" alt="">
+                    </a>
+                </div>
+                <div class="col-8 col-md-6 text-end mt-3">
+                    {% if request.user.is_authenticated %}
+                        <a class="fw-bold text-white text-decoration-none me-5" href="{% url 'home' %}">{{ request.user.first_name }} {{ request.user.last_name }}</a>
+                    {% else %}
+                        <a class="fw-bold text-white text-decoration-none me-5" href="{% url 'login-user' %}">Log In</a>
+                        <a class="fw-bold text-white text-decoration-none" href="{% url 'create-enduser' %}">Sign Up</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% block content %}
+            {% endblock %}
+            <div class="row h-50 bg-dark mb-0">
+                <div class="col-4 col-sm-4 col-md-4 mb-4">
+                    <p><a class="text-secondary" href="{% url 'create-fault-report' %}">Report a fault</a></p>
+                    <p><a class="text-secondary" href="{% url 'create-customer-review' %}">Leave a review</a></p>
+                </div>
+            <div class="col-4 col-sm-4 col-md-4 mb-4">
+                <a class="text-secondary" href="{% url 'home' %}">Dashboard</a>
+            </div>
+            <div class="col-4 col-sm-4 col-md-4 mb-4">
+                <span class="text-secondary">Social Links</span>
+            </div>
+            <div class="col-md-12 text-center pb-0 mb-0">
+                <strong class="text-white mb-0">
+                    Copyright &copy; 2025&nbsp;
+                    <a href="{% url 'landing-page' %}" class="text-white text-decoration-none mb-0 pb-0">FHS Facilities</a>.
+                </strong>
+            </div>
+            </div>
+        </div>
+    </body>
+    <script>
+    function hideButton(btnId, divId){
+      document.getElementById(btnId).classList.add('d-none');
+      const textSpan = document.createElement('span');
+      textSpan.textContent = 'Processing';
+      document.getElementById(divId).appendChild(textSpan);
+    }
+  </script>
+</html>

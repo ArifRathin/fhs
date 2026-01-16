@@ -1,0 +1,108 @@
+{% extends 'base-front-end/admin/base.html' %}
+{% block title %}
+  <title>{{ page_ }}</title>
+{% endblock %}
+{% block content %}
+<!--begin::App Main-->
+<main class="app-main">
+  <!--begin::App Content Header-->
+  <div class="app-content-header">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-sm-6">
+          <h3 class="mb-0">{{ page_ }}</h3>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ page_ }}</li>
+          </ol>
+        </div>
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content Header-->
+  <!--begin::App Content-->
+  <div class="app-content">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row g-4">
+        <!--begin::Col-->
+        <div class="col-12">
+          {% for message in messages %}
+            {% if message.extra_tags == 'success-edit-admin' %}
+              <div class="callout callout-success">
+                {{ message }}
+              </div>
+            {% elif message.extra_tags == 'error-edit-admin' %}
+              <div class="callout callout-danger">
+                {{ message }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <!--end::Col-->
+        <!--begin::Col-->
+        <div class="col-md-6">
+          <!--begin::Quick Example-->
+          <div class="card card-primary card-outline mb-4">
+            <!--begin::Form-->
+            <form action="{% url 'edit-admin' %}" method="POST">
+              {% csrf_token %}
+              <!--begin::Body-->
+              <div class="card-body">
+                <input type="hidden" name="admin-id" value="{{ admin.id }}">
+                <div class="mb-3">
+                  <label for="" class="form-label">First Name</label>
+                  <input type="text" name="first-name" value="{{ admin.first_name }}" class="form-control" id="" aria-describedby="adminFirstName" />
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Last Name</label>
+                  <input type="text" name="last-name" value="{{ admin.last_name }}" class="form-control" id="" aria-describedby="adminLastName" />
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Email</label>
+                  <input type="text" name="email" value="{{ admin.email }}" class="form-control" id="" aria-describedby="adminEmail" />
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Phone</label>
+                  <input type="text" name="phone" value="{{ admin.phone }}" class="form-control" id="" aria-describedby="adminPhone" />
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Password</label>
+                  <input type="password" name="password" value="" class="form-control" id="" aria-describedby="adminPhone" />
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Retype Password</label>
+                  <input type="password" name="retype-password" value="" class="form-control" id="" aria-describedby="adminPhone" />
+                </div>
+              </div>
+              <!--end::Body-->
+              <!--begin::Footer-->
+              <div class="card-footer">
+                <button type="submit" class="btn btn-primary">Update</button>
+              </div>
+              <!--end::Footer-->
+            </form>
+            <!--end::Form-->
+          </div>
+          <!--end::Quick Example-->
+        </div>
+        <!--end::Col-->
+        <!--begin::Col-->
+        <div class="col-md-6">
+        </div>
+        <!--end::Col-->
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content-->
+</main>
+{% endblock %}

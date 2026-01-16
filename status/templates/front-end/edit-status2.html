@@ -1,0 +1,18 @@
+<html>
+    <head>
+        <title>Edit Status</title>
+    </head>
+    <body>
+        <div>
+            <form action="{% url 'edit-status' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="status-id" value="{{ status.id }}">
+                <label for="">Status</label>
+                <input type="text" name="status" value="{{ status.status }}">
+                <input type="radio" name="is-active" value="1" {% if status.is_active == True %}checked{% endif %}>Active
+                <input type="radio" name="is-active" value="0" {% if status.is_active == False %}checked{% endif %}>Inactive
+                <button type="submit">Update</button>
+            </form>
+        </div>
+    </body>
+</html>

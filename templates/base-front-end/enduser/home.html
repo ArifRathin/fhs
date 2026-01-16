@@ -1,0 +1,98 @@
+{% extends 'base-front-end/enduser/base.html' %}
+{% load static %}
+{% block title %}
+    <title>FHS Facilities</title>
+{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mx-0">
+        <img class="img img-fluid vh-50 w-100 mx-0 px-0" style="filter:brightness(90%);"
+            src="/media/{{ front_page.banner_image }}" alt="">
+    </div>
+</div>
+<div class="row mt-0 text-center">
+    <div class="col-md-12 mx-0 pb-2">
+        <h1 class="fw-bold">Need a technician or specialist</h1>
+        <a class="btn btn-lg btn-outline-primary text-dark" href="{% url 'create-fault-report' %}">Report A Fault</a>
+    </div>
+    <hr>
+</div>
+<div class="row mt-3 text-center">
+    <div class="col-md-4 mx-0 pb-2">
+        <div class="card border-primary">
+            <h1 class="fw-bold">{{ total_completed }}</h1>
+            <img class="img img-fluid h-50" src="{% static 'assets/front-end/jobs_completed.png' %}" alt="">
+        </div>
+    </div>
+    <div class="col-md-4 mx-0 pb-2">
+        <div class="card border-primary">
+            <h1 class="fw-bold">{{ unique_customers }}</h1>
+            <img class="img img-fluid h-50" src="{% static 'assets/front-end/happy_customers.png' %}" alt="">
+        </div>
+    </div>
+    <div class="col-md-4 mx-0 pb-2">
+        <div class="card border-primary">
+            <h1 class="fw-bold">{{ total_locations }}</h1>
+            <img class="img img-fluid h-50" src="{% static 'assets/front-end/service_areas.png' %}" alt="">
+        </div>
+    </div>
+    <hr>
+</div>
+<div class="row mt-4 text-center">
+    <div class="col-md-12">
+        <h1>Review from a few happy clients</h1>
+    </div>
+    {% for review in customer_reviews %}
+        <div class="col-md-3 mx-0 pb-2">
+            <div class="card border-primary">
+                <img class="img img-fluid h-50 rounded-circle mx-5 my-1" src="/media/front_page/default_profile2.png"
+                    alt="">
+                <figure>
+                    <blockquote class="blockquote">
+                        <p class="fst-italic">{{ review.review }}</p>
+                    </blockquote>
+                    <figcaption class="blockquote-footer">
+                        <cite title="Source Title">{{ review.customer_name }}</cite>
+                    </figcaption>
+                </figure>
+            </div>
+        </div>
+    {% endfor %}
+    <hr>
+</div>
+<div class="row mt-4 text-center">
+    <div class="col-md-12">
+        <h1>Our Team</h1>
+    </div>
+    {% for member in members %}
+        <div class="col-md-3 mx-0 pb-2">
+            <div class="card border-primary">
+                <img style="width:200px;height:200px;" class="text-center img img-fluid rounded-circle mx-5 my-1" src="/media/{{ member.member_image }}"
+                    alt="">
+                <figure>
+                    <blockquote class="blockquote">
+                        <p>{{ member.member.first_name }} {{ member.member.last_name }}</p>
+                    </blockquote>
+                    <figcaption class="blockquote-footer">
+                        {{ member.designation }} <cite title="Source Title">{{ member.details }}</cite>
+                    </figcaption>
+                </figure>
+            </div>
+        </div>
+    {% endfor %}
+    <hr>
+</div>
+<div class="row mt-4 text-center">
+    <div class="col-md-12">
+        <h1>Our Simple Steps To Solve Your Issue</h1>
+    </div>
+    <div class="col-md-12 mx-0 pb-2">
+        <div class="card border-primary">
+            <img class="img img-fluid h-50 rounded-circle mx-5 my-1"
+                src="{% static 'assets/front-end/how_we_work.png' %}" alt="">
+        </div>
+    </div>
+    <hr>
+</div>
+
+{% endblock %}

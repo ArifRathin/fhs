@@ -1,0 +1,29 @@
+{% extends 'base-front-end/enduser/base.html' %}
+{% block title %}
+    <title>Customer Review</title>
+{% endblock %}
+{% load static %}
+{% block content %}
+<div class="row bg-secondary-subtle h-100">
+    <div class="col-md-6 my-3 rounded bg-white mx-auto">
+        <h3 class="text-center">Customer Review</h3>
+        <form class="form-group" action="{% url 'create-customer-review' %}" method="POST" onsubmit="hideButton('id-add-review', 'id-add-review-div')">
+            {% csrf_token %}
+            {% for message in messages %}
+                <div class="alert {% if message.extra_tags == 'success-create-review' %} bg-success-subtle {% else %} bg-error-subtle {% endif %} text-dark fw-bold">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            <label class="fw-bold" for="">Customer name</label>
+            <input class="form-control" name="customer-name" type="text" {% if request.user.is_authenticated %} value="{{ request.user.first_name }} {{ request.user.last_name }}" {% endif %}>
+            <label class="fw-bold" for="">Review</label>
+            <textarea class="form-control" name="review" id=""></textarea>
+            <!-- <input type="radio" name="is-published" value="0" checked>Unpublished
+            <input type="radio" name="is-published" value="1">Published -->
+            <div class="text-center" id="id-add-review-div">
+                <button id="id-add-review" class="btn btn-primary form-control mt-2" type="submit">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

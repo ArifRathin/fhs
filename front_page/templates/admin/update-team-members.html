@@ -1,0 +1,110 @@
+{% extends 'base-front-end/admin/base.html' %}
+{% block title %}
+    <title>{{ page_ }}</title>
+{% endblock %}
+{% block content %}
+<!--begin::App Main-->
+<main class="app-main">
+  <!--begin::App Content Header-->
+  <div class="app-content-header">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-sm-6">
+          <h3 class="mb-0">{{ page_ }}</h3>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ page_ }}</li>
+          </ol>
+        </div>
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content Header-->
+  <!--begin::App Content-->
+  <div class="app-content">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row g-4">
+        <!--begin::Col-->
+        <div class="col-12">
+          {% for message in messages %}
+            {% if message.extra_tags == 'success-update-member' %}
+              <div class="callout callout-success">
+                {{ message }}
+              </div>
+            {% elif message.extra_tags == 'error-update-member' %}
+              <div class="callout callout-danger">
+                {{ message }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <!--end::Col-->
+        <!--begin::Col-->
+        <div class="col-md-6">
+          <!--begin::Quick Example-->
+          <div class="card card-primary card-outline mb-4">
+            <!--begin::Form-->
+            <form action="{% url 'update-team-member' %}" method="POST" enctype="multipart/form-data">
+              {% csrf_token %}
+              <!--begin::Body-->
+              <div class="card-body">
+                <div class="mb-3">
+                  <input type="hidden" name="member-id" value="{{ member.id }}">
+                  <label for="" class="form-label">Member</label>
+                  <select class="form-control" name="member-user-id" id="">
+                        <option value="{{ member.member.id }}" selected>{{ member.member.first_name }} {{ member.member.last_name }}</option>
+                    {% for member in members %}
+                        <option value="{{ member.id }}">{{ member.first_name }} {{ member.last_name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Member Image</label>
+                  <img class="img img-fluid m-2" style="width:60px;" src="/media/{{ member.member_image }}" alt="">
+                  <input type="file" name="member-image" class="form-control" id="" aria-describedby="memberImage" />
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Designation</label>
+                  <input type="text" name="designation" value="{{ member.designation }}" class="form-control" id="" aria-describedby="designation" />
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Details</label>
+                  <textarea name="details" class="form-control" id="" aria-describedby="details">{{ member.details }}</textarea>
+                </div>
+                <div class="mb-3">
+                  <input type="radio" name="is-published" value="0" {% if member.is_published == False %}checked{% endif %}>Unpublished
+                  <input type="radio" name="is-published" value="1" {% if member.is_published == True %}checked{% endif %}>Published
+                </div>
+              </div>
+              <!--end::Body-->
+              <!--begin::Footer-->
+              <div class="card-footer">
+                <button type="submit" class="btn btn-primary">Update</button>
+              </div>
+              <!--end::Footer-->
+            </form>
+            <!--end::Form-->
+          </div>
+          <!--end::Quick Example-->
+        </div>
+        <!--end::Col-->
+        <!--begin::Col-->
+        <div class="col-md-6">
+        </div>
+        <!--end::Col-->
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content-->
+</main>
+{% endblock %}

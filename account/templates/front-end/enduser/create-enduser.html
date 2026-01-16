@@ -1,0 +1,73 @@
+{% extends 'base-front-end/enduser/login-register-base.html' %}
+{% block content %}
+<p class="register-box-msg">Sign up</p>
+<form action="{% url 'create-enduser' %}" method="post">
+    {% csrf_token %}
+    <div class="col-12">
+        {% for message in messages %}
+            {% if message.extra_tags == 'success-create-user' %}
+              <div class="callout callout-success">
+                {{ message }}
+              </div>
+            {% elif message.extra_tags == 'error-create-user' %}
+              <div class="callout callout-danger">
+                {{ message }}
+              </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <div class="input-group mb-1">
+        <div class="form-floating">
+            <input required id="registerFullName" type="text" name="first-name" class="form-control" placeholder="" />
+            <label for="registerFullName">First Name</label>
+        </div>
+        <div class="input-group-text"><span class="bi bi-person"></span></div>
+    </div>
+    <div class="input-group mb-1">
+        <div class="form-floating">
+            <input required id="registerFullName" type="text" name="last-name" class="form-control" placeholder="" />
+            <label for="registerFullName">Last Name</label>
+        </div>
+        <div class="input-group-text"><span class="bi bi-person"></span></div>
+    </div>
+    <div class="input-group mb-1">
+        <div class="form-floating">
+            <input required id="registerEmail" type="email" name="email" class="form-control" placeholder="" />
+            <label for="registerEmail">Email</label>
+        </div>
+        <div class="input-group-text"><span class="bi bi-envelope"></span></div>
+    </div>
+    <div class="input-group mb-1">
+        <div class="form-floating">
+            <input required id="registerEmail" type="text" name="phone" class="form-control" placeholder="" />
+            <label for="registerEmail">Phone</label>
+        </div>
+        <div class="input-group-text"><span class="bi bi-phone"></span></div>
+    </div>
+    <div class="input-group mb-1">
+        <div class="form-floating">
+            <input required id="registerPassword" type="password" name="password" class="form-control" placeholder="" />
+            <label for="registerPassword">Password</label>
+        </div>
+        <div class="input-group-text"><span class="bi bi-lock-fill"></span></div>
+    </div>
+    <div class="input-group mb-1">
+        <div class="form-floating">
+            <input required id="registerPassword" type="password" name="retype-password" class="form-control" placeholder="" />
+            <label for="registerPassword">Retype Password</label>
+        </div>
+        <div class="input-group-text"><span class="bi bi-lock-fill"></span></div>
+    </div>
+    <!--begin::Row-->
+    <div class="row">
+        <!-- /.col -->
+        <div class="col-4">
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </div>
+        <!-- /.col -->
+    </div>
+    <!--end::Row-->
+</form>
+{% endblock %}
