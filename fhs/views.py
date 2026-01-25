@@ -28,5 +28,5 @@ def updateNotifStatus(request):
     try:
         Notification.objects.filter(id__lte = notifId, notif_for_id=request.user.id).update(is_opened=True)
         return JsonResponse({'success':True})
-    except:
-        return JsonResponse({'success':False})
+    except Exception as e:
+        return JsonResponse({'success':str(e)})

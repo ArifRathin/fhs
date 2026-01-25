@@ -81,7 +81,7 @@ def sendEmail(sender, instance, created, **kwargs):
         subject = 'New Fault Report Submitted'
         body = 'front-end/emails/submitted-report.html'
         context = {}
-        email_sender.sendEmail(subject=subject, body=body, to=to, context=context)
+        email_sender.sendEmail.delay(subject=subject, body=body, to=to, context=context)
     elif instance.status == 'C':
         to = []
         to.append(instance.contact_email)

@@ -2,7 +2,9 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
+from celery import shared_task
 
+@shared_task
 def sendEmail(**kwargs):
     subject = kwargs.get('subject')
     body = kwargs.get('body')

@@ -56,7 +56,7 @@ def sendEmail(sender, instance, created, **kwargs):
             'receiver_name':instance.fault_report.contact_name,
             'quote_full_link':quoteFullLink
         }
-        email_sender.sendEmail(subject=subject, to=to, body=body, context=context)
+        email_sender.sendEmail.delay(subject=subject, to=to, body=body, context=context)
     elif instance.fault_report.status == 'QA':
         subject = 'Quotation Approved'
         superAdmin = User.objects.filter(is_superadmin=True).first()
@@ -70,4 +70,4 @@ def sendEmail(sender, instance, created, **kwargs):
         context = {
             'quote_full_link':quoteFullLink
         }
-        email_sender.sendEmail(subject=subject, to=to, body=body, context=context)
+        email_sender.sendEmail.delay(subject=subject, to=to, body=body, context=context)

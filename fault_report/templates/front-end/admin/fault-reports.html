@@ -116,6 +116,8 @@
                       {% for quote in fault.quotes.all %}
                         {% if perms.quotation.view_quotation %}
                           <a class="text-dark" href="{% url 'view-quotation' quoteRefNum=quote.quote_ref_num %}">Show</a>
+                        {% elif user.is_enduser == True %}
+                          <a class="text-dark" href="{% url 'view-client-quotation' quoteEmailCode=quote.email_code %}">Show</a>
                         {% endif %}
                       {% endfor %}
                     </td>

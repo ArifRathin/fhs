@@ -156,11 +156,15 @@
           <li class="nav-item dropdown">
             <a class="nav-link" data-bs-toggle="dropdown" href="#" onclick="updateNotifStatus()">
               <i class="bi bi-bell-fill"></i>
-              <span class="navbar-badge badge text-bg-warning {% if notifications|length == 0 %}d-none{% endif %}">{{ notifications|length }}</span>
+              <span id="id-notif-count-outer" class="navbar-badge badge text-bg-warning {% if notifications|length == 0 %}d-none{% endif %}">{{ notifications|length }}</span>
             </a>
             <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end px-2">
-              <span class="dropdown-item dropdown-header">{{ notifications|length }} Notifications</span>
+              <span id="id-notif-count-inner" class="dropdown-item dropdown-header">{{ notifications|length }} Notifications</span>
               <div class="dropdown-divider"></div>
+              <div id="id-notif-div">
+              {% if notifications|length == 0 %}
+                <input id="id-notif-id" type="hidden">
+              {% endif %}
               {% for notification in notifications %}
                 {% if forloop.first %}
                   <input id="id-notif-id" type="hidden" value="{{ notification.id }}">
@@ -184,7 +188,6 @@
                       <i class="bi bi-file-earmark-fill me-2"></i> 
                       <span style="overflow-x: scroll;">{{ notification.text }}</span>
                     </div>
-                    <!-- <span class="float-end text-secondary fs-7">{{ notification.created_at }}</span> -->
                   </a>
                   <div class="dropdown-divider"></div>
                 {% elif notification.notif_area == 'A' %}
@@ -198,6 +201,7 @@
                   <div class="dropdown-divider"></div>
                 {% endif %}
               {% endfor %}
+                </div>
               <!-- <a href="#" class="dropdown-item dropdown-footer"> See All Notifications </a> -->
             </div>
           </li>
@@ -527,21 +531,75 @@
   <!--end::OverlayScrollbars Configure-->
   <!-- OPTIONAL SCRIPTS -->
   <!-- apexcharts -->
-  <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.min.js"
-    integrity="sha256-+vh8GkaU7C9/wbSLIcwq82tQ2wTf44aOHA8HlBMwRI8=" crossorigin="anonymous"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.min.js"
+    integrity="sha256-+vh8GkaU7C9/wbSLIcwq82tQ2wTf44aOHA8HlBMwRI8=" crossorigin="anonymous"></script> -->
   <script>
-    function updateNotifStatus(){
-      $.ajax({
-        method:'GET',
-        url:"{% url 'update-notif-status' %}",
-        data:{'notif-id':$('#id-notif-id').val()},
-        success:function(response){
-          console.log(response.success);
+    var totalNotifs = '{{ notifications|length }}';
+    totalNotifs = parseInt(totalNotifs);
+    console.log(typeof(totalNotifs));
+    console.log(totalNotifs);
+    const ws = new WebSocket(`ws://${window.location.host}/ws/notification/`);
+    ws.onmessage = (e) => {
+      console.log(e);
+      const strMsg = JSON.parse(e.data);
+      console.log(strMsg.text);
+      totalNotifs += 1;
+      const notifCountSpanOuter = document.getElementById('id-notif-count-outer');
+      notifCountSpanOuter.classList.remove('d-none');
+      notifCountSpanOuter.textContent = totalNotifs;
+
+      const notifCountSpanInner = document.getElementById('id-notif-count-inner');
+      notifCountSpanInner.textContent = totalNotifs+" Notifications";
+
+      document.getElementById('id-notif-id').value = strMsg.id;
+
+      const notifDiv = document.getElementById('id-notif-div');
+      if(strMsg.notif_area == 'F' || strMsg.notif_area == 'A'){
+        let link = "{% url 'fault-report-details' faultId=0  %}";
+        var finalLink = link.replace('0', strMsg.fault_id);
+      }
+      else if(strMsg.notif_area == 'Q'){
+        if(strMsg.is_admin == 1){
+          let link = "{% url 'view-quotation' quoteRefNum=0  %}";
+          var finalLink = link.replace('0', strMsg.quote_ref_num);
         }
-      });
+        else{
+          let link = "{% url 'view-client-quotation' quoteEmailCode=0  %}";
+          var finalLink = link.replace('0', strMsg.email_code);
+        }
+      }
+      innerHtml = `<a class="text-muted text-decoration-none" href="${finalLink}">
+                    <div>
+                      <i class="bi bi-file-earmark-fill me-2"></i> 
+                      <span style="overflow-x: scroll;">${strMsg.text}</span>
+                    </div>
+                  </a>
+                  <div class="dropdown-divider"></div>`;
+      notifDiv.insertAdjacentHTML('afterbegin', innerHtml);
+    }
+
+    async function updateNotifStatus(){
+      const notifId = document.getElementById('id-notif-id').value;
+      alert(notifId);
+      const url = `{% url 'update-notif-status' %}?notif-id=${notifId}`;
+      
+      try{
+        response = await fetch(url);
+
+        if(!response.ok){
+          throw new Error('Error Status: '+error.message);
+        }
+
+        data = await response.json();
+        console.log(data);
+        document.getElementById('id-notif-count-outer').classList.add('d-none');
+      }
+      catch(error){
+        console.error(error.message);
+      }
     }
   </script>
-  <script>
+  <!-- <script>
     // NOTICE!! DO NOT USE ANY OF THIS JAVASCRIPT
     // IT'S ALL JUST JUNK FOR DEMO
     // ++++++++++++++++++++++++++++++++++++++++++
@@ -690,7 +748,7 @@
     // - END PIE CHART -
     //-----------------
   </script>
-  <!--end::Script-->
+  end::Script -->
 </body>
 <!--end::Body-->
 

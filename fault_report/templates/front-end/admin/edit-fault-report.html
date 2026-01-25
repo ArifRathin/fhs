@@ -181,7 +181,7 @@
             <div class="card-header">
               <h3>Assign a technician</h3>
             </div>
-            <form class="form-group" action="{% url 'assign-a-technician' %}" method="POST">
+            <form class="form-group" action="{% url 'assign-a-technician' %}" method="POST" onsubmit="hideButton('id-assign-technician', 'id-assign-technician-div')">
               <div class="card-body">
                 {% csrf_token %}
                 {% for user in fault.user_technician.all %}
@@ -200,27 +200,27 @@
                 </select>
               </div>
               {% if fault.status != 'C' %}
-                <div class="card-footer">
-                  <button type="submit" class="btn btn-primary">Assign</button>
+                <div id="id-assign-technician-div" class="card-footer">
+                  <button id="id-assign-technician" type="submit" class="btn btn-primary">Assign</button>
                 </div>
               {% endif %}
             </form>
           </div>
           {% if fault.started_at == None %}
-            <div>
-              <a class="btn btn-primary form-control" href="{% url 'start-task' faultId=fault.fault_id %}">Start Task</a>
+            <div id="id-start-task-div">
+              <a id="id-start-task" class="btn btn-primary form-control" href="{% url 'start-task' faultId=fault.fault_id %}" onclick="hideButton('id-start-task', 'id-start-task-div')">Start Task</a>
             </div>
           {% else %}
-            <div>
+            <div id="id-resume-pause-task-div">
               {% if fault.status == 'P' %}
-                <a class="btn btn-primary form-control" href="{% url 'resume-task' faultId=fault.fault_id %}">Resume</a>
+                <a id="id-resume-task" class="btn btn-primary form-control" href="{% url 'resume-task' faultId=fault.fault_id %}" onclick="hideButton('id-resume-task', 'id-resume-pause-task-div')">Resume</a>
               {% elif fault.status == 'IP' %}
-                <a class="btn btn-primary form-control" href="{% url 'pause-task' faultId=fault.fault_id %}">Pause</a>
+                <a id="id-pause-task" class="btn btn-primary form-control" href="{% url 'pause-task' faultId=fault.fault_id %}" onclick="hideButton('id-pause-task', 'id-resume-pause-task-div')">Pause</a>
               {% endif %}
             </div>
             {% if fault.status != 'C' %}
-              <div class="mt-2">
-                <a class="btn btn-primary form-control" href="{% url 'complete-task' faultId=fault.fault_id %}">Mark as complete</a>
+              <div id="id-complete-task-div" class="mt-2">
+                <a id="id-complete-task" class="btn btn-primary form-control" href="{% url 'complete-task' faultId=fault.fault_id %}" onclick="hideButton('id-complete-task', 'id-complete-task-div')">Mark as complete</a>
               </div>
             {% endif %}
           {% endif %}

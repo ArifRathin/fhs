@@ -8,7 +8,8 @@ from front_page.models import FrontPage
 import random
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 # Create your views here.
 @login_required(login_url='login-user')
 def createQuotation(request, faultReportId=0):
@@ -99,7 +100,9 @@ def sendQuotation(request, quoteRefNum):
                 user = User.objects.get(email=quotation.fault_report.contact_email)
                 Notification.objects.create(text="A quotation has been created for your request.",notif_by_id=request.user.id,notif_for_id=user.id,notif_area='Q',fault_report=quotation.fault_report,quotation=quotation)
             messages.success(request, 'Quotation sent to the client', extra_tags='success-sent-quotation')
+            return redirect(request.META['HTTP_REFERER'])
         messages.error(request, 'Quotation could not be sent!', extra_tags='error-sent-quotation')
+        return redirect(request.META['HTTP_REFERER'])
     except:
         messages.error(request, 'Something went wrong!', extra_tags='error-sent-quotation')
     return redirect(request.META['HTTP_REFERER'])
@@ -138,6 +141,23 @@ def updateClientApprovalStatus(request, quoteRefNum, approvalStatus):
                 notification = Notification(text=text,notif_by_id=notifById,notif_for_id=admin.id,notif_area='Q',fault_report=quotation.fault_report,quotation=quotation)
                 notifArr.append(notification)
             Notification.objects.bulk_create(notifArr) 
+            for notification in notifArr:
+                async_to_sync(get_channel_layer().group_send)(
+                    f'user__{notification.notif_for_id}',
+                    {
+                        'type':'send_notification',
+                        'message':{
+                            'id':notification.id,
+                            'text':notification.text,
+                            'notif_for_id':notification.notif_for_id,
+                            'notif_area':notification.notif_area,
+                            'fault_id':str(notification.fault_report.fault_id),
+                            'is_opened':notification.is_opened,
+                            'quote_ref_num':notification.quotation.quote_ref_num,
+                            'is_admin':1
+                        }
+                    }
+                )
             messages.success(request, 'Successfully updated.', extra_tags='success-update-quotation')
             return redirect(request.META['HTTP_REFERER'])
         messages.error(request, 'Could not update!', extra_tags='error-update-quotation')

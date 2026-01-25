@@ -28,5 +28,21 @@
         <!-- /.col -->
     </div>
     <!--end::Row-->
+    <!--begin::Row-->
+    <div class="row">
+        <!-- /.col -->
+        <div class="col-12 text-center">
+            <div id="id-log-in-div" class="d-grid gap-2">
+                <a class="text-muted" href="{% url 'send-change-password-link' %}">Forgot password?</a>
+            </div>
+        </div>
+        <div class="col-12 text-center mt-2">
+            <div id="id-log-in-div">
+                Not registered? <a class="text-muted" href="{% url 'create-enduser' %}">Sign up</a>
+            </div>
+        </div>
+        <!-- /.col -->
+    </div>
+    <!--end::Row-->
 </form>
 {% endblock %}

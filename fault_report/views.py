@@ -10,6 +10,8 @@ from django.db import transaction
 from django.utils import timezone
 from datetime import timedelta
 from django.contrib import messages
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 # Create your views here.
 def createFaultReport(request):
     if request.method == 'POST':
@@ -44,12 +46,28 @@ def createFaultReport(request):
                     notification = Notification(text="A new fault report has been submitted.",notif_by_id=notifById,notif_for_id=admin.id,notif_area='F',fault_report=faultReport)
                     notifArr.append(notification)
                 Notification.objects.bulk_create(notifArr)
+                for notification in notifArr:
+                    async_to_sync(get_channel_layer().group_send)(
+                        f'user__{notification.notif_for_id}',
+                        {
+                            'type':'send_notification',
+                            'message':{
+                                'id':notification.id,
+                                'text':notification.text,
+                                'notif_for_id':notification.notif_for_id,
+                                'notif_area':notification.notif_area,
+                                'fault_id':str(notification.fault_report.fault_id),
+                                'is_opened':notification.is_opened,
+                                'is_admin':1
+                            }
+                        }
+                    )
                 messages.success(request, 'Successfully created fault report.', extra_tags='success-create-report')
                 return redirect(request.META['HTTP_REFERER'])
             messages.error(request, 'Could not create fault report.', extra_tags='error-create-report')
             return redirect(request.META['HTTP_REFERER'])
-        except:
-            messages.error(request, 'Something went wrong!', extra_tags='error-create-report')
+        except Exception as e:
+            messages.error(request, str(e), extra_tags='error-create-report')
             return redirect(request.META['HTTP_REFERER'])
     
     jobs = Job.objects.all()
@@ -203,6 +221,22 @@ def assignATechnician(request):
                     notification = Notification(text="A technician has been assigned to your task.",notif_by_id=request.user.id,notif_for_id=user.id,notif_area='A',fault_report=faultReport)
                 notifArr.append(notification)
             Notification.objects.bulk_create(notifArr)
+            for notification in notifArr:
+                    async_to_sync(get_channel_layer().group_send)(
+                        f'user__{notification.notif_for_id}',
+                        {
+                            'type':'send_notification',
+                            'message':{
+                                'id':notification.id,
+                                'text':notification.text,
+                                'notif_for_id':notification.notif_for_id,
+                                'notif_area':notification.notif_area,
+                                'fault_id':str(notification.fault_report.fault_id),
+                                'is_opened':notification.is_opened,
+                                'is_admin':0
+                            }
+                        }
+                    )
             faultReport.save()
             messages.success(request, 'Technician successfully assigned.', extra_tags='success-edit-report')
     except Exception as e:
@@ -300,7 +334,22 @@ def completeTask(request, faultId):
                 notification = Notification(text="Task completed",notif_by_id=request.user.id,notif_for_id=id,notif_area='F',fault_report=faultReport)
                 notifArr.append(notification)
             Notification.objects.bulk_create(notifArr)
-
+            for notification in notifArr:
+                    async_to_sync(get_channel_layer().group_send)(
+                        f'user__{notification.notif_for_id}',
+                        {
+                            'type':'send_notification',
+                            'message':{
+                                'id':notification.id,
+                                'text':notification.text,
+                                'notif_for_id':notification.notif_for_id,
+                                'notif_area':notification.notif_area,
+                                'fault_id':str(notification.fault_report.fault_id),
+                                'is_opened':notification.is_opened,
+                                'is_admin':0
+                            }
+                        }
+                    )
             messages.success(request, 'The task has been completed.', extra_tags='success-edit-report')
     except:
         messages.error(request, 'Something went wrong!', extra_tags='error-edit-report')
