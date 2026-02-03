@@ -12,6 +12,7 @@ from datetime import timedelta
 from django.contrib import messages
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+from fhs.image_processor import processImage
 # Create your views here.
 def createFaultReport(request):
     if request.method == 'POST':
@@ -34,7 +35,8 @@ def createFaultReport(request):
                     faultReport.user_technician.set([request.user.id])
                 imageArr = []
                 for image in images:
-                    imageArr.append(FaultReportImage(fault_report = faultReport, image=image))
+                    processedImage = processImage(image)
+                    imageArr.append(FaultReportImage(fault_report = faultReport, image=processedImage))
                 if imageArr:
                     FaultReportImage.objects.bulk_create(imageArr)
                 admins = User.objects.filter(is_admin=True)
@@ -63,7 +65,7 @@ def createFaultReport(request):
                         }
                     )
                 messages.success(request, 'Successfully created fault report.', extra_tags='success-create-report')
-                return redirect(request.META['HTTP_REFERER'])
+                return redirect('home')
             messages.error(request, 'Could not create fault report.', extra_tags='error-create-report')
             return redirect(request.META['HTTP_REFERER'])
         except Exception as e:
@@ -198,17 +200,14 @@ def assignATechnician(request):
             userArr = []
             users = faultReport.user_technician.all()
             for user in users:
-                if user.is_technician == True:
-                    user.is_available = True
-                    user.save()
-                else:
+                if user.is_technician == False:
                     userArr.append(user.id)
             userArr.append(technicianId)
             faultReport.user_technician.set(userArr)
             faultReport.is_assigned = True
 
             technician = User.objects.get(id=technicianId)
-            technician.is_available = False
+            # technician.is_available = False
             technician.save()
 
             if faultReport.status == 'S' or faultReport.status == 'QS' or faultReport.status == 'QA':

@@ -1,5 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+from django.conf import settings
+from django.urls import reverse
+from fhs.email_sender import sendEmail
+
 # Create your models here.
 class UserManager(BaseUserManager):
 
@@ -39,6 +45,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.CharField(max_length=255, unique=True)
     phone = models.CharField(max_length=20, unique=True)
 
+    account_activation_code = models.CharField(max_length=255, default=None, null=True)
     change_password_code = models.CharField(max_length=255, default=None, null=True)
 
     is_active = models.BooleanField(default=False)
@@ -65,3 +72,20 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     def has_module_perms(self, app_label):
         return True
+    
+
+@receiver(post_save, sender=User)
+def sendEmailToUser(sender, instance, created, **kwargs):
+    if created:
+        if instance.is_enduser==True and instance.is_active == False and instance.account_activation_code != None:
+            to = []
+            to.append(instance.email)
+            subject = "Account activation email from FHS"
+            link = reverse('activate-account', args=[instance.account_activation_code])
+            fullLink = f'{settings.BASIC_URL}{link}'
+            body = 'front-end/emails/send-enduser-account-activation-link-email.html'
+            context = {
+                'receiver_name':f'{instance.first_name} {instance.last_name}',
+                'full_link':fullLink
+            }
+            sendEmail(subject=subject, body=body, context=context, to=to)

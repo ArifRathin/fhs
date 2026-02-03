@@ -45,6 +45,8 @@
   <!-- apexcharts -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.css"
     integrity="sha256-4MX+61mt9NVvvuPjUWdUdyfZfxSB1/Rf9WtqRHgG5S0=" crossorigin="anonymous" />
+  {% block css %}
+  {% endblock %}
 </head>
 
 <body class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
@@ -218,8 +220,8 @@
           <!--begin::User Menu Dropdown-->
           <li class="nav-item dropdown user-menu">
             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-              <span class="d-none d-md-inline">
-                {{ request.user.first_name }} {{ request.user.last_name }}
+              <span class="">
+                <i class="bi bi-person-fill" style="font-size: 1.2rem;"></i>
               </span>
             </a>
             <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
@@ -307,7 +309,7 @@
             {% endif %}
             <li class="nav-item {% if sub_menu == 'Fault-Reports' %}menu-open{% endif %}">
               <a href="#" class="nav-link">
-                <i class="nav-icon bi bi-file-earmark-fill"></i>
+                <i class="nav-icon bi bi-file-earmark"></i>
                 <p>
                   Fault Reports
                   <i class="nav-arrow bi bi-chevron-right"></i>
@@ -387,6 +389,25 @@
                 {% endif %}
               </ul>
             </li>
+            <li class="nav-item {% if sub_menu == 'Customers' %}menu-open{% endif %}">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-people"></i>
+                <p>
+                  Customers
+                  <i class="nav-arrow bi bi-chevron-right"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                {% if perms.account.view_user %}
+                  <li class="nav-item">
+                    <a href="{% url 'customer-list' %}" class="nav-link">
+                      <i class="nav-icon bi bi-circle{% if page_ == 'Customer List' %}-fill{% endif %}"></i>
+                      <p>Customer List</p>
+                    </a>
+                  </li>
+                {% endif %}
+              </ul>
+            </li>
             <li class="nav-item {% if sub_menu == 'Job' %}menu-open{% endif %}">
               <a href="#" class="nav-link">
                 <i class="nav-icon bi bi-briefcase"></i>
@@ -414,6 +435,63 @@
                 {% endif %}
               </ul>
             </li>
+            <li class="nav-item {% if sub_menu == 'Address' %}menu-open{% endif %}">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon bi bi-map"></i>
+                  <p>
+                    Address
+                    <i class="nav-arrow bi bi-chevron-right"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item {% if sub_menu2 == 'Location' %}menu-open{% endif %}">
+                    <a href="#" class="nav-link">
+                      <i class="nav-icon bi bi-pin-map"></i>
+                      <p>
+                        Locations
+                        <i class="nav-arrow bi bi-chevron-right"></i>
+                      </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                      <li class="nav-item">
+                        <a href="{% url 'create-location' %}" class="nav-link">
+                          <i class="nav-icon bi bi-record-circle{% if page_ == 'Create Location' %}-fill{% endif %}"></i>
+                          <p>Create Location</p>
+                        </a>
+                      </li>
+                      <li class="nav-item">
+                        <a href="{% url 'location-list' %}" class="nav-link">
+                          <i class="nav-icon bi bi-record-circle{% if page_ == 'Location List' %}-fill{% endif %}"></i>
+                          <p>Location List</p>
+                        </a>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="nav-item {% if sub_menu2 == 'Organization' %}menu-open{% endif %}">
+                    <a href="#" class="nav-link">
+                      <i class="nav-icon bi bi-building"></i>
+                      <p>
+                        Organization
+                        <i class="nav-arrow bi bi-chevron-right"></i>
+                      </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                      <li class="nav-item">
+                        <a href="{% url 'create-organization' %}" class="nav-link">
+                          <i class="nav-icon bi bi-record-circle{% if page_ == 'Create Organization' %}-fill{% endif %}"></i>
+                          <p>Create Organization</p>
+                        </a>
+                      </li>
+                      <li class="nav-item">
+                        <a href="{% url 'organization-list' %}" class="nav-link">
+                          <i class="nav-icon bi bi-record-circle{% if page_ == 'Organization List' %}-fill{% endif %}"></i>
+                          <p>Organization List</p>
+                        </a>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
             <li class="nav-item {% if sub_menu == 'Setting' %}menu-open{% endif %}">
               <a href="#" class="nav-link">
                 <i class="nav-icon bi bi-gear"></i>
@@ -474,7 +552,7 @@
       <!--end::To the end-->
       <!--begin::Copyright-->
       <strong>
-        Copyright &copy; 2025&nbsp;
+        Copyright &copy; 2026&nbsp;
         <a href="{% url 'landing-page' %}" class="text-decoration-none">FHS Facilities</a>.
       </strong>
       All rights reserved.
@@ -485,6 +563,9 @@
   <!--end::App Wrapper-->
   <!--begin::Script-->
   <!--begin::Third Party Plugin(OverlayScrollbars)-->
+  {% if page_ != 'Fault Reports' %}
+    <script src="{% static 'js/admin/jquery.min.js' %}"></script>
+  {% endif %}
   {% block scripts %}
   {% endblock %}
   <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js"
@@ -496,9 +577,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
   <!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
   <script src="{% static 'js/admin/adminlte.js' %}"></script>
-  {% if page_ != 'Fault Reports' %}
-    <script src="{% static 'js/admin/jquery.min.js' %}"></script>
-  {% endif %}
+  
   <!--end::Required Plugin(AdminLTE)--><!--begin::OverlayScrollbars Configure-->
   <script>
     function hideButton(btnId, divId){

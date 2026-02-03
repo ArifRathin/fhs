@@ -35,7 +35,7 @@ class TimeUnit(models.TextChoices):
 
 class FaultReport(models.Model):
     fault_id = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=True)
-    user_technician = models.ManyToManyField(User, related_name='fault_report', default=None, null=True) # either a customer or a technician
+    user_technician = models.ManyToManyField(User, related_name='fault_report') # either a customer or a technician
     contact_name = models.CharField(max_length=255)
     contact_phone = models.CharField(max_length=20)
     contact_email = models.CharField(max_length=255)
@@ -44,6 +44,7 @@ class FaultReport(models.Model):
     job_description = models.CharField(max_length=255, default=None, null=True)
     priority_level = models.CharField(choices=PriorityLevel.choices, max_length=2, default=PriorityLevel.LOW)
     description = models.TextField()
+    preferred_time = models.DateTimeField(default=None, null=True)
     status = models.CharField(choices=ReportStatus.choices, max_length=2, default=ReportStatus.SUBMITTED)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -67,9 +68,19 @@ def saveFaultReportImage(instance, filename):
     return os.path.join('fault_report_attachments', image)
 
 
+def saveCompletionImage(instance, filename):
+    extension = filename.split('.')[:-1]
+    if instance.pk:
+        filename = f'completion_{instance.pk}{uuid.uuid4().hex}.{extension}'
+    else:
+        filename = f'{uuid.uuid4().hex}.{extension}'
+    return os.path.join('completion_images', filename)
+
+    
 class FaultReportImage(models.Model):
     fault_report = models.ForeignKey(FaultReport, on_delete=models.CASCADE)
     image = models.ImageField(upload_to=saveFaultReportImage)
+    completion_image = models.ImageField(upload_to=saveCompletionImage, blank=True, default=None, null=True)
 
 
 @receiver(post_save, sender=FaultReport)
@@ -93,7 +104,7 @@ def sendEmail(sender, instance, created, **kwargs):
             'receiver_name':instance.contact_name,
             'details_full_link':detailsFullLink
         }
-        email_sender.sendEmail(subject=subject, body=body, to=to, context=context)
+        email_sender.sendEmail.delay(subject=subject, body=body, to=to, context=context)
     elif instance.status == 'A':
         for user in instance.user_technician.all():
             to = []
@@ -109,4 +120,4 @@ def sendEmail(sender, instance, created, **kwargs):
                 'receiver_name':f'{user.first_name} {user.last_name}',
                 'details_full_link':detailsFullLink
             }
-            email_sender.sendEmail(subject=subject, body=body, to=to, context=context)
+            email_sender.sendEmail.delay(subject=subject, body=body, to=to, context=context)

@@ -41,6 +41,13 @@
         <div class="container-fluid">
             <!-- Info boxes -->
             <div class="row">
+                {% for message in messages %}
+                    {% if message.extra_tags == 'success-create-report' or message.extra_tags == 'success-activate-account' %}
+                        <div class="alert text-white bg-success">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
                 {% if request.user.is_admin %}
                 <div class="col-12 col-sm-6 col-md-4">
                     <div class="info-box">

@@ -9,7 +9,7 @@
               <div class="callout callout-success">
                 {{ message }}
               </div>
-            {% elif message.extra_tags == 'error-create-user' %}
+            {% elif message.extra_tags == 'error-create-user' or message.extra_tags == 'error-activate-account' %}
               <div class="callout callout-danger">
                 {{ message }}
               </div>

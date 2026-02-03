@@ -1,0 +1,157 @@
+{% extends 'base-front-end/admin/base.html' %}
+{% block title %}
+  <title>
+    {{ page_ }}
+  </title>
+{% endblock %}
+{% block content %}
+<!--begin::App Main-->
+<main class="app-main">
+  <!--begin::App Content Header-->
+  <div class="app-content-header">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-sm-6">
+          <h3 class="mb-0">{{ page_ }}</h3>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ page_ }}</li>
+          </ol>
+        </div>
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content Header-->
+  <!--begin::App Content-->
+  <div class="app-content">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+
+        <div class="col-12">
+          <div class="card card-primary card-outline mb-4">
+            <div class="card-body">
+              <div class="container-fluid">
+                <div class="row">
+                    <div class="text-end col-12 mb-2">
+                        <span class="text-white bg-info p-1 fw-bold">
+                            {% if is_registered == True %}
+                                Registered Customer
+                            {% else %}
+                                Not a registered customer
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <p class="fw-bold mb-0">Customer Email</p>
+                        <span class="fw-bold text-muted">{{ customer_email }}</span>
+                    </div>
+                    <div class="col-6 text-end">
+                        <p class="fw-bold mb-0">Total Reports</p>
+                        <span class="fw-bold text-muted">{{ total_reports }}</span>
+                    </div>
+                    {% if is_registered == True %}
+                        <div class="col-6 mb-3">
+                            <p class="fw-bold mb-0">Customer Name</p>
+                            <span class="fw-bold text-muted">{{ user.first_name }} {{ user.last_name }}</span>
+                        </div>
+                        <div class="col-6 text-end">
+                            <p class="fw-bold mb-0">Phone</p>
+                            <span class="fw-bold text-muted">{{ user.phone }}</span>
+                        </div>
+                    {% endif %}
+                    <div class="col-6">
+                        <p class="fw-bold mb-0">Total Bill</p>
+                        <span class="fw-bold text-muted">{{ total_bill }}<i class="bi bi-currency-pound"></i></span>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-12">
+          <!-- /.card -->
+          <div class="card mb-4">
+            <!-- /.card-header -->
+            <div class="card-body p-0">
+                <p class="m-3 h5">History</p>
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Job Type</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Reported at</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for history in customer_history %}
+                    <tr class="align-middle">
+                      <td>
+                        {% if history.job_description == '' %}
+                            {{ history.job.title }}
+                        {% else %}
+                            {{ history.job_description }}
+                        {% endif %}
+                      </td>
+                      <td>
+                        {% for value, label in statuses %}
+                            {% if value == history.status %}
+                                {% if history.status == 'C' %}
+                                    <span class="badge bg-success">{{ label }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ label }}</span>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                      </td>
+                      <td>
+                        {% for value, label in priority_levels %}
+                            {% if history.priority_level == value %}
+                                {% if value == 'U' %}
+                                    <span class="badge bg-danger">{{ label }}</span>
+                                {% elif value == 'H' %}
+                                    <span class="badge bg-warning">{{ label }}</span>
+                                {% elif value == 'M' %}
+                                    <span class="badge bg-primary">{{ label }}</span>
+                                {% elif value == 'L' %}
+                                    <span class="badge bg-info">{{ label }}</span>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                      </td>
+                      <td>
+                        {{ history.created_at|date:'d F, Y' }} at {{ history.created_at|date:'P' }}
+                      </td>
+                      <td>
+                        <a class="btn btn-sm bg-primary text-white" href="{% url 'fault-report-details' faultId=history.fault_id %}">View details</a>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <!-- /.card-body -->
+          </div>
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
+        <!-- /.col -->
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content-->
+</main>
+<!--end::App Main-->
+{% endblock %}

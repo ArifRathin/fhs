@@ -53,7 +53,7 @@
                 <div class="row mt-2">
                   <div class="col-md-6 text-start">
                     <h5>FHS Facilities</h5>
-                    <span>31 Dinnath Sen Road, Gandaria, Dhaka-1204</span>
+                    <span>21a Northgate Bradford, West Yorkshire BD1 3JR </span>
                   </div>
                   <div class="col-md-6 text-end">
                     <img class="img img-fluid" src="{% static '/assets/admin/fhs-logo.png' %}" alt="" style="width:50px;">
@@ -69,11 +69,11 @@
                   <div class="col-md-6 text-end">
                     <span class="h5">Ref# {{ quotation.quote_ref_num }}</span><br>
                     <span class="h6">{{ quotation.created_at|date:"d F, Y" }}</span><br>
-                    {% if quotation.payment_status == 'U' %}
+                    <!-- {% if quotation.payment_status == 'U' %}
                       <span class="h5 fw-bold text-danger">UNPAID</span><br>
                     {% else %}
                       <span class="h5 fw-bold text-success">PAID</span><br>
-                    {% endif %}
+                    {% endif %} -->
                   </div>
                   <div class="row">
                     <div class="col-md-12">
@@ -90,14 +90,14 @@
                               <td>{{ bill.service_name }}</td>
                               <td>{{ bill.price_per_unit }}</td>
                               <td>{{ bill.total_units }}</td>
-                              <td>{{ bill.price_per_unit|multiplyFloats:bill.total_units }}</td>
+                              <td>{{ bill.price_per_unit|multiplyFloats:bill.total_units }}<i class="bi bi-currency-pound"></i></td>
                             </tr>
                           {% endfor %}
                           <tr>
                             <td><span class="fw-bold">Subtotal</span></td>
                             <td></td>
                             <td></td>
-                            <td>{{ quotation.sub_total_bill }}</td>
+                            <td>{{ quotation.sub_total_bill }}<i class="bi bi-currency-pound"></i></td>
                           </tr>
                           <tr>
                             <td><span class="fw-bold">Sales tax</span></td>
@@ -109,7 +109,7 @@
                             <td><span class="fw-bold">Total</span></td>
                             <td></td>
                             <td></td>
-                            <td>{{ quotation.total_bill }}</td>
+                            <td>{{ quotation.total_bill }}<i class="bi bi-currency-pound"></i></td>
                           </tr>
                         </tbody>
                       </table>

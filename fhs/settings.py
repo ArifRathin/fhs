@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     'quotation',
     'notification',
     'front_page',
-    'channels'
+    'channels',
+    'address'
 ]
 
 MIDDLEWARE = [
@@ -136,7 +137,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-BASIC_URL = '127.0.0.1:8000'
+BASIC_URL = 'services.fhsfacilities.com'
 
 STATIC_URL = 'static/'
 
@@ -160,6 +161,7 @@ DEFAULT_FROM_EMAIL = "ecc.eagle@gmail.com"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_HOST_USER = "ecc.eagle@gmail.com"
 EMAIL_HOST_PASSWORD = "omcevrvteokwqvkq"

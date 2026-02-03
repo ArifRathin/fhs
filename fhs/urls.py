@@ -26,6 +26,7 @@ urlpatterns = [
     path('update-notif-status/', views.updateNotifStatus, name='update-notif-status'),
     path('user-management-area/', include('account.urls')),
     path('user-management-area/', include('job.urls')),
+    path('user-management-area/', include('address.urls')),
     # path('user-management-area/', include('priority_level.urls')),
     # path('user-management-area/', include('status.urls')),
     path('user-management-area/', include('quotation.urls')),

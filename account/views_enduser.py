@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from .models import User
-from fault_report.models import FaultReport
+from fault_report.models import FaultReport, PriorityLevel, ReportStatus
 from front_page.models import FrontPage
 from django.db import transaction
 from django.contrib import messages
@@ -10,6 +10,10 @@ from fhs.email_sender import sendEmail
 from django.urls import reverse
 from django.conf import settings
 from django.contrib.auth import authenticate, login
+from django.db.models import Count
+from django.db.models import Sum
+from quotation.models import Quotation
+
 
 def createEndUser(request):
     if request.method == 'POST':
@@ -36,13 +40,13 @@ def createEndUser(request):
         try:
             with transaction.atomic():
                 user = User.objects.create_user(first_name=firstName, last_name=lastName, email=email, phone=phone, password=password)
-                user.is_active = True
                 user.is_enduser = True
+                user.account_activation_code = generateRandomStr()
                 user.save()
                 fault_reports = FaultReport.objects.filter(contact_email=user.email)
                 for report in fault_reports:
                     report.user_technician.set([user.id])
-                messages.success(request, 'Successfully created account', extra_tags='success-create-user')
+                messages.success(request, 'Please check your email to activate your account.', extra_tags='success-create-user')
                 return redirect(request.META['HTTP_REFERER'])
         except Exception as e:
             messages.error(request, 'Something went wrong!', extra_tags='error-create-user')
@@ -54,21 +58,62 @@ def createEndUser(request):
     return render(request, 'front-end/enduser/create-enduser.html', data)
 
 
+def activateAccount(request, code):
+    if User.objects.filter(account_activation_code=code).exists():
+        user = User.objects.get(account_activation_code=code)
+        user.is_activate = True
+        user.account_activation_code = None
+        user.save()
+        messages.success(request, 'Account activated!', extra_tags='success-activate-account')
+        return redirect('home')
+    else:
+        messages.error(request, "This account doesn't exist", extra_tags='error-activate-account')
+        return redirect('create-enduser')
+
+
+def customerList(request):
+    customers = FaultReport.objects.values('contact_email').annotate(total_reports=Count('contact_email')).order_by('-total_reports')
+    data = {
+        'sub_menu':'Customers',
+        'page_':'Customer List',
+        'customers':customers
+    }
+    return render(request, 'front-end/enduser/enduser-list.html', data)
+
+
+def customerHistory(request, customerEmail):
+    history = FaultReport.objects.filter(contact_email=customerEmail).order_by('-created_at')
+    totalReports = FaultReport.objects.filter(contact_email=customerEmail).count()
+    totalbill = Quotation.objects.filter(fault_report__contact_email=customerEmail, approval_status='QA').aggregate(total_bill=Sum('total_bill'))
+    isRegistered = User.objects.filter(email=customerEmail).exists()
+    user = None
+    if isRegistered:
+        user = User.objects.get(email=customerEmail)
+    data={
+        'sub_menu':'Customers',
+        'page_':'Customer History',
+        'customer':user,
+        'is_registered':isRegistered,
+        'customer_email':customerEmail,
+        'customer_history':history,
+        'total_reports':totalReports,
+        'total_bill':totalbill['total_bill'],
+        'priority_levels':PriorityLevel.choices,
+        'statuses':ReportStatus.choices
+    }
+    return render(request, 'front-end/enduser/enduser-history.html', data)
+
+
 def sendChangePasswordLink(request):
     if request.method == 'POST':
         email = request.POST.get('email')
-        randomCharArr=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9']
-        randomStr = ''
-        for _ in range(0,50):
-            randomIndex = random.randint(0, 61)
-            randomChar = randomCharArr[randomIndex]
-            randomStr += randomChar
+        randomStr = generateRandomStr()
         try:
             if User.objects.filter(email=email).exists():
                 user = User.objects.get(email=email)
                 user.change_password_code = randomStr
                 user.save()
-                subject = "Change password on FHS"
+                subject = "Change password!!"
                 to = []
                 to.append(email)
                 body = 'front-end/emails/send-change-password-link-email.html'
@@ -86,7 +131,7 @@ def sendChangePasswordLink(request):
                 messages.error(request, "Email could not be sent!!", extra_tags="error-send-change-password-link")
                 return redirect(request.META['HTTP_REFERER'])
         except Exception as e:
-            messages.error(request, "Email could not be sent!", extra_tags="error-send-change-password-link")
+            messages.error(request, str(e), extra_tags="error-send-change-password-link")
             return redirect(request.META['HTTP_REFERER'])
 
     frontPage = FrontPage.objects.all().first()
@@ -131,3 +176,14 @@ def changePassword(request, code=0):
         'code':code
     }
     return render(request, 'front-end/change-password.html', data)
+
+
+def generateRandomStr():
+    randomCharArr=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9']
+    randomStr = ''
+    for _ in range(0,50):
+        randomIndex = random.randint(0, 61)
+        randomChar = randomCharArr[randomIndex]
+        randomStr += randomChar
+
+    return randomStr

@@ -6,7 +6,7 @@ from front_page.models import FrontPage
 from django.db.models import Q, Avg
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.models import Permission
 from django.contrib import messages
 # Create your views here.
 def createAdmin(request, type='external'):

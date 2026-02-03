@@ -23,9 +23,13 @@ urlpatterns = [
 
     # End-user URLs
     path('create-enduser/', views_enduser.createEndUser, name='create-enduser'),
+    path('activate-account/<str:code>', views_enduser.activateAccount, name='activate-account'),
+    path('customer-list/', views_enduser.customerList, name='customer-list'),
+    path('customer-history/<str:customerEmail>', views_enduser.customerHistory, name='customer-history'),
     path('send-change-password-link/', views_enduser.sendChangePasswordLink, name='send-change-password-link'),
     path('change-password/<str:code>', views_enduser.changePassword, name='change-password'),
     path('change-password/', views_enduser.changePassword, name='change-password'),
+
     # Fault Reports URLs
     path('fault-reports/', views_fault_reports.faultReportList, name='fault-reports')
 ]
