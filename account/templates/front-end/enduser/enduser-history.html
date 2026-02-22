@@ -133,7 +133,7 @@
                         {{ history.created_at|date:'d F, Y' }} at {{ history.created_at|date:'P' }}
                       </td>
                       <td>
-                        <a class="btn btn-sm bg-primary text-white" href="{% url 'fault-report-details' faultId=history.fault_id %}">View details</a>
+                        <a class="btn btn-sm bg-primary text-white" href="{% url 'fault-report-details' jobNumber=history.job_number %}">View details</a>
                       </td>
                     </tr>
                   {% endfor %}
