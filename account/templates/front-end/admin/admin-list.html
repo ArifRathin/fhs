@@ -22,6 +22,19 @@
             <li class="breadcrumb-item active" aria-current="page">{{ page_ }}</li>
           </ol>
         </div>
+        <div class="col-12">
+          {% for message in messages %}
+            {% if message.extra_tags == 'success-admin-list' %}
+              <div class="alert text-white bg-success">
+                {{ message }}
+              </div>
+            {% elif message.extra_tags == 'error-admin-list' %}
+              <div class="alert text-white bg-danger">
+                {{ message }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
       </div>
       <!--end::Row-->
     </div>
@@ -86,7 +99,10 @@
                     </td>
                     <td>
                       {% if perms.account.change_user %}
-                        <a class="btn btn-sm btn-primary" href="{% url 'edit-admin' adminId=admin.id %}">Edit</a>
+                        <a class="text-primary" href="{% url 'edit-admin' adminId=admin.id %}"><i class="bi bi-pencil"></i></a>
+                      {% endif %}
+                      {% if perms.account.delete_user %}
+                        <a type="button" data-bs-toggle="modal" data-bs-target="#deleteModal" class="text-danger" href="javascript:void(0)" onclick="deleteRecord('delete the admin?',`{% url 'delete-admin' adminId=admin.id %}`)"><i class="bi bi-trash"></i></a>
                       {% endif %}
                         <!-- <a class="btn btn-sm btn-danger" href="">Delete</a> -->
                     </td>
@@ -105,6 +121,7 @@
       <!--end::Row-->
     </div>
     <!--end::Container-->
+    {% include 'base-front-end/modals/delete-modal.html' %}  
   </div>
   <!--end::App Content-->
 </main>

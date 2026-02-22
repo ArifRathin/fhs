@@ -33,7 +33,16 @@
             <label class="fw-bold" for="">Images (You can choose multiple if you want)</label>
             <input class="form-control" name="images" type="file" multiple="true">
             <label class="fw-bold" for="">Location</label>
-            <input required class="form-control" name="location" type="text">
+            <select class="form-control" name="location-id" id="">
+              {% for location in locations %}
+                <option value="{{ location.id }}">{{ location.name }}</option>
+              {% endfor %}
+                <option value="">Others</option>
+            </select>
+            <label class="fw-bold" for="">Address</label>
+            <textarea class="form-control" required name="address" id=""></textarea>
+            <label class="fw-bold" for="">Preferred Time</label>
+            <input class="form-control" type="datetime-local" name="preferred-time">
             <label class="fw-bold" for="">Job type</label>
             <select class="form-control" name="job-type" id="">
                 {% for job in jobs %}
@@ -48,6 +57,10 @@
                 <option value="{{ value }}">{{ label }}</option>
                 {% endfor %}
             </select>
+            <label class="fw-bold" for="">Purchase Order Number</label>
+            <input class="form-control" name="po-number" type="text">
+            <input type="radio" name="if-recall" value="0" checked><span class="fw-bold">New Task</span>
+            <input type="radio" name="if-recall" value="1"><span class="fw-bold">Recall</span>
             <div id="id-submit-report-div" class="mt-2 text-center">
               <button id="id-submit-report" class="btn btn-primary form-control" type="submit">Submit</button>
             </div>

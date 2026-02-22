@@ -22,6 +22,8 @@ def sendEmail(**kwargs):
     email.attach_alternative(htmlContent, 'text/html')
     try:
         email.send()
+        print('Sent email')
         return True
     except:
+        print('Could not send email!')
         return False

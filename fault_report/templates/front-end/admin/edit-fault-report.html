@@ -74,7 +74,7 @@
           <!--begin::Quick Example-->
           <div class="card card-primary card-outline mb-4">
             <!--begin::Form-->
-            <form action="{% url 'edit-fault-report' %}" method="POST" onsubmit="hideButton('id-update-report','id-update-report-div')">
+            <form action="{% url 'edit-fault-report' %}" method="POST" enctype="multipart/form-data" onsubmit="hideButton('id-update-report','id-update-report-div')">
               {% csrf_token %}
               <!--begin::Body-->
               <div class="card-body">
@@ -92,6 +92,14 @@
                   {% endfor %}
                 </div>
                 <div class="mb-3">
+                  <label for="" class="form-label mb-0">Job Number</label>
+                  <p class="mt-0">
+                    <span class="fw-bold">
+                      {{ fault.job_number }}
+                    </span>
+                  </p>
+                </div>
+                <div class="mb-3">
                   <label for="" class="form-label mb-0">Job Type</label>
                   <p class="mt-0">
                     <span class="fw-bold">
@@ -104,14 +112,31 @@
                   </p>
                 </div>
                 <div class="mb-3">
+                  <label for="" class="form-label mb-0">Purchase Order Number</label>
+                  <p class="mt-0">
+                    <input class="form-control" name="po-number" type="text" value="{% if fault.po_number != None %}{{ fault.po_number }}{% endif %}">
+                  </p>
+                </div>
+                <div class="mb-3">
+                  <input type="radio" name="if-recall" value="0" {% if fault.if_recall == False %}checked{% endif %}>New Task
+                  <input type="radio" name="if-recall" value="1" {% if fault.if_recall == True %}checked{% endif %}>Recall
+                </div>
+                <div class="mb-3">
                   <label for="" class="form-label">Contact Name</label>
                   <input required type="text" name="contact-name" value="{{ fault.contact_name }}" class="form-control" id=""
                     aria-describedby="contactName" />
                 </div>
                 <div class="mb-3">
                   <label for="" class="form-label">Location</label>
-                  <input required type="text" name="location" value="{{ fault.location }}" class="form-control" id=""
-                    aria-describedby="location" disabled />
+                  <select class="form-control" name="location-id" id="">
+                    {% for location in locations %}
+                      <option value="{{ location.id }}" {% if fault.location.id == location.id %}selected{% endif %}>{{ location.name }}{% if location.address != None %}-({{ location.address }}){% endif %}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="exampleInputPassword1" class="form-label">Address</label>
+                  <textarea class="form-control" name="address" id="">{{ fault.address }}</textarea>
                 </div>
                 <div class="mb-3">
                   <label for="exampleInputPassword1" class="form-label">Contact Phone</label>
@@ -122,16 +147,24 @@
                   <input required type="text" name="contact-email" value="{{ fault.contact_email }}" class="form-control" id="">
                 </div>
                 <div class="mb-3">
+                  <label for="exampleInputPassword1" class="form-label">Preferred Time</label>
+                  <input type="datetime-local" name="preferred-time" class="form-control" value="{{ fault.preferred_time|date:'Y-m-d\TH:i' }}">
+                </div>
+                <div class="mb-3">
                   <label for="exampleInputPassword1" class="form-label">Description</label>
                   <textarea required name="description" class="form-control" id="">{{ fault.description }}</textarea>
                 </div>
                 <div class="mb-3">
                   <div class="container-fluid px-0">
                     <div class="row">
-                      <label for="exampleInputPassword1" class="form-label">Attached Images</label>
                       {% for image in fault.faultreportimage_set.all %}
+                        {% if forloop.first %}
+                          <label for="exampleInputPassword1" class="form-label">Attached Images</label>
+                        {% endif %}
                         <div class="col-md-3">
-                          <img class="img img-fluid" src="/media/{{image.image}}" alt="">
+                          <a target="_blank" href="/media/{{image.image}}">
+                            <img class="img img-fluid" src="/media/{{image.image}}" alt="">
+                          </a>
                         </div>
                       {% endfor %}
                     </div>
@@ -155,19 +188,41 @@
                     </div>
                   </div>
                 </div>
+                <div class="mb-3">
+                  <label role="button" for="id-completion-image" class="form-label">Note</label>
+                  <textarea required type="text" name="note" class="form-control" placeholder="Add notes related to fault reports here">{% if fault.note != None %}{{ fault.note }}{% endif %}</textarea>
+                </div>
+                <div class="mb-3">
+                  <div class="container-fluid px-0">
+                    <div class="row">
+                      {% for image in fault.completionimage_set.all %}
+                        {% if forloop.first %}
+                          <label for="" class="form-label">Completion Images</label>
+                        {% endif %}
+                        <div class="col-3">
+                          <a href="/media/{{ image.image }}">
+                            <img class="img img-fluid" src="/media/{{ image.image }}" alt="">
+                          </a>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label role="button" for="id-completion-image" class="form-label">Add Completion Images(+)</label>
+                  <input accept="image/*" type="file" multiple name="completion-image" class="form-control" id="id-completion-image">
+                </div>
               </div>
               <!--end::Body-->
               <!--begin::Footer-->
-              {% if fault.status != 'C' %}
-                <div id="id-update-report-div" class="card-footer">
-                  <button id="id-update-report" type="submit" class="btn btn-primary">Update</button>
-                  {% if fault.status == 'S' or fault.status == 'QC' %}
-                    <a href="{% url 'create-quotation' faultReportId=fault.id %}" class="btn btn-primary">Create
-                      Quotation
-                    </a>
-                  {% endif %}
-                </div>
-              {% endif %}
+              <div id="id-update-report-div" class="card-footer">
+                <button id="id-update-report" type="submit" class="btn btn-primary">Update</button>
+                {% if fault.status == 'S' or fault.status == 'QC' %}
+                  <a href="{% url 'create-quotation' faultReportId=fault.id %}" class="btn btn-primary">Create
+                    Quotation
+                  </a>
+                {% endif %}
+              </div>
               <!--end::Footer-->
             </form>
             <!--end::Form-->
@@ -191,7 +246,7 @@
                     </div>
                   {% endif %}
                 {% endfor %}
-                <input type="hidden" name="fault-id" value="{{ fault.fault_id }}">
+                <input type="hidden" name="job-number" value="{{ fault.job_number }}">
                 <select class="form-control" name="technician-id" id="">
                   <option value="">Select a technician</option>
                   {% for technician in technicians %}
@@ -208,21 +263,21 @@
           </div>
           {% if fault.started_at == None %}
             <div id="id-start-task-div">
-              <a id="id-start-task" class="btn btn-primary form-control" href="{% url 'start-task' faultId=fault.fault_id %}" onclick="hideButton('id-start-task', 'id-start-task-div')">Start Task</a>
+              <a id="id-start-task" class="btn btn-primary form-control" href="{% url 'start-task' jobNumber=fault.job_number %}" onclick="hideButton('id-start-task', 'id-start-task-div')">Start Task</a>
             </div>
           {% else %}
             <div id="id-resume-pause-task-div">
               {% if fault.status == 'P' %}
-                <a id="id-resume-task" class="btn btn-primary form-control" href="{% url 'resume-task' faultId=fault.fault_id %}" onclick="hideButton('id-resume-task', 'id-resume-pause-task-div')">Resume</a>
+                <a id="id-resume-task" class="btn btn-primary form-control" href="{% url 'resume-task' jobNumber=fault.job_number %}" onclick="hideButton('id-resume-task', 'id-resume-pause-task-div')">Resume</a>
               {% elif fault.status == 'IP' %}
-                <a id="id-pause-task" class="btn btn-primary form-control" href="{% url 'pause-task' faultId=fault.fault_id %}" onclick="hideButton('id-pause-task', 'id-resume-pause-task-div')">Pause</a>
+                <a id="id-pause-task" class="btn btn-primary form-control" href="{% url 'pause-task' jobNumber=fault.job_number %}" onclick="hideButton('id-pause-task', 'id-resume-pause-task-div')">Pause</a>
               {% endif %}
             </div>
-            {% if fault.status != 'C' %}
-              <div id="id-complete-task-div" class="mt-2">
-                <a id="id-complete-task" class="btn btn-primary form-control" href="{% url 'complete-task' faultId=fault.fault_id %}" onclick="hideButton('id-complete-task', 'id-complete-task-div')">Mark as complete</a>
-              </div>
-            {% endif %}
+            <div id="id-complete-task-div">
+              {% if fault.status != 'C' %}
+                <a id="id-complete-task" class="btn btn-primary form-control" href="{% url 'complete-task' jobNumber=fault.job_number %}" onclick="hideButton('id-complete-task', 'id-complete-task-div')">Complete</a>
+              {% endif %}
+            </div>
           {% endif %}
           </div>
         <!--end::Col-->

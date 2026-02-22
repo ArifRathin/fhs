@@ -8,6 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Permission
 from django.contrib import messages
+from .views_enduser import generateRandomStr
 # Create your views here.
 def createAdmin(request, type='external'):
     if request.method == 'POST':
@@ -34,14 +35,14 @@ def createAdmin(request, type='external'):
             lastName = 'Member'
 
         isSuperadmin = False
-        isActive = False
+        isActive = True
         if User.objects.filter(is_superadmin=True).count()==0:
             isSuperadmin = True
-            isActive = True
         try:
             admin = User.objects.create_superuser(email=email, phone=phone, password=password, is_superadmin=isSuperadmin, is_active=isActive, first_name=firstName, last_name=lastName)
-            permissions = Permission.objects.all()
-            admin.user_permissions.set(permissions)
+            if isSuperadmin:
+                permissions = Permission.objects.all()
+                admin.user_permissions.set(permissions)
             messages.success(request, 'Successfully created admin.', extra_tags='success-create-admin')
             return redirect(request.META['HTTP_REFERER'])
         except Exception as e:
@@ -72,6 +73,11 @@ def editAdmin(request, adminId=0):
         phone = request.POST.get('phone').strip()
         password = request.POST.get('password').strip()
         retypePassword = request.POST.get('retype-password').strip()
+        isActive = request.POST.get('is-active').strip()
+        if isActive == '1':
+            isActive = True
+        else:
+            isActive = False
     admin = User.objects.get(id=adminId)
     if request.method == 'GET':
         notifications = Notification.objects.filter(is_opened=False, notif_for_id=request.user.id).order_by('-id')
@@ -105,6 +111,7 @@ def editAdmin(request, adminId=0):
         except:
             messages.error(request, 'Could not save password!', extra_tags='error-edit-admin')
             return redirect(request.META['HTTP_REFERER'])
+    admin.is_active = isActive
     try:
         admin.save()
         messages.success(request, 'Successfully updated.', extra_tags='success-edit-admin')
@@ -129,19 +136,52 @@ def adminList(request):
     return render(request, 'front-end/admin/admin-list.html', data)
 
 
+def deleteAdmin(request, adminId):
+    if request.user.has_perm('account.delete_user'):
+        try:
+            if adminId == request.user.id:
+                messages.success(request, 'You cannot delete yourself!', extra_tags='error-admin-list')
+                return redirect(request.META['HTTP_REFERER'])
+            admin = User.objects.get(id=adminId)
+            if admin.is_superadmin:
+                messages.success(request, 'You cannot delete the super admin!', extra_tags='error-admin-list')
+                return redirect(request.META['HTTP_REFERER'])
+            admin.delete()
+            messages.success(request, 'Successfully deleted the admin.', extra_tags='success-admin-list')
+            return redirect(request.META['HTTP_REFERER'])
+        except Exception as e:
+            messages.error(request, 'Failed to delete the admin!', extra_tags='error-admin-list')
+            return redirect(request.META['HTTP_REFERER'])
+    else:
+        messages.error(request, 'Something went wrong!', extra_tags='error-admin-list')
+        return redirect(request.META['HTTP_REFERER'])
+
+
 def loginUser(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
-        user = authenticate(request, email=email, password=password)
-        if user:
-            try:
-                login(request, user)
-                return redirect('home')
-            except:
-                return HttpResponse('Something went wrong!')
+        user = User.objects.filter(email=email).first()
+        if user is not None:
+            if user.is_enduser == True and user.is_active == False:
+                user.account_activation_code = generateRandomStr()
+                user.save()
+                messages.error(request, "Please check your email to activate your account!", extra_tags='error-login-user')
+                return redirect(request.META['HTTP_REFERER'])
+            user = authenticate(request, email=email, password=password)
+            if user:
+                try:
+                    login(request, user)
+                    return redirect('home')
+                except:
+                    messages.error(request, "Something went wrong!", extra_tags='error-login-user')
+                    return redirect(request.META['HTTP_REFERER'])
+            else:
+                messages.error(request, "Invalid email/password", extra_tags='error-login-user')
+                return redirect(request.META['HTTP_REFERER'])
         else:
-            return HttpResponse('Invalid email/password')
+            messages.error(request, "Account does not exist!", extra_tags='error-login-user')
+            return redirect(request.META['HTTP_REFERER'])
     frontPage = FrontPage.objects.all().first()
     data = {
         'front_page':frontPage

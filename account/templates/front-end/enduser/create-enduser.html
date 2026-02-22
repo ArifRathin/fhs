@@ -9,7 +9,7 @@
               <div class="callout callout-success">
                 {{ message }}
               </div>
-            {% elif message.extra_tags == 'error-create-user' or message.extra_tags == 'error-activate-account' %}
+            {% elif message.extra_tags == 'error-create-user' %}
               <div class="callout callout-danger">
                 {{ message }}
               </div>
@@ -36,6 +36,29 @@
             <label for="registerEmail">Email</label>
         </div>
         <div class="input-group-text"><span class="bi bi-envelope"></span></div>
+    </div>
+    <div class="input-group mb-1">
+        <div class="form-floating">
+            <select class="form-control" name="organization-id" id="id-organization" onchange="getLocFromOrg()">
+                <option value="" style="font-style: italic;">Not an organization</option>
+                {% for organization in organizations %}
+                    <option value="{{ organization.id }}">{{ organization.name }}</option>
+                {% endfor %}
+            </select>
+            <label for="registerEmail">Organization <small>(Optional)</small></label>
+        </div>
+        <div class="input-group-text"><span class="bi bi-building"></span></div>
+    </div>
+    <div class="input-group mb-1">
+        <div class="form-floating">
+            <select class="form-control" name="location-id" id="id-location">
+                {% for location in locations %}
+                    <option value="{{ location.id }}">{{ location.name }}</option>
+                {% endfor %}
+            </select>
+            <label for="registerEmail">Location</label>
+        </div>
+        <div class="input-group-text"><span class="bi bi-pin-map"></span></div>
     </div>
     <div class="input-group mb-1">
         <div class="form-floating">
@@ -70,4 +93,46 @@
     </div>
     <!--end::Row-->
 </form>
+{% endblock %}
+{% block scripts %}
+<script>
+const locationMap = new Map();
+{% for location in locations %}
+    locationMap.set({{ location.id }},'{{ location.name }}');
+{% endfor %}
+console.log(locationMap);
+async function getLocFromOrg(){
+    const orgElement = document.querySelector('#id-organization');
+    const organizationId = orgElement.value;
+    const locElement = document.querySelector('#id-location');
+
+    if(organizationId == ''){
+        var options = '';
+        locationMap.forEach((name, id)=>{
+            options += `<option value='${id}'>${name}</option>`
+        });
+        locElement.innerHTML=options;
+    }
+    else{
+        const url = `{% url 'get-loc-from-org' %}?organizationId=${organizationId}`;
+        try{
+            const response = await fetch(url);
+            if(!response.ok){
+                throw new Error('Error message '+error.message);
+            }
+            const locations = await response.json();
+            console.log(locations);
+            locElement.innerHTML='';
+            var options = '';
+            locations.forEach((loc)=>{
+                options += `<option value='${loc.id}'>${loc.name}</option>`;
+            });
+            locElement.innerHTML = options;
+        }
+        catch(error){
+            console.log(error.message);
+        }
+    }
+}
+</script>
 {% endblock %}

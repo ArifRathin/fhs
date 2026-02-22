@@ -185,7 +185,7 @@
                   </a>
                   <div class="dropdown-divider"></div>
                 {% elif notification.notif_area == 'F' %}
-                  <a class="text-muted text-decoration-none" href="{% url 'fault-report-details' faultId=notification.fault_report.fault_id  %}">
+                  <a class="text-muted text-decoration-none" href="{% url 'fault-report-details' jobNumber=notification.fault_report.job_number  %}">
                     <div>
                       <i class="bi bi-file-earmark-fill me-2"></i> 
                       <span style="overflow-x: scroll;">{{ notification.text }}</span>
@@ -193,7 +193,7 @@
                   </a>
                   <div class="dropdown-divider"></div>
                 {% elif notification.notif_area == 'A' %}
-                  <a class="text-muted text-decoration-none" href="{% url 'fault-report-details' faultId=notification.fault_report.fault_id  %}">
+                  <a class="text-muted text-decoration-none" href="{% url 'fault-report-details' jobNumber=notification.fault_report.job_number  %}">
                     <div>
                       <i class="bi bi-file-earmark-fill me-2"></i> 
                       <span style="overflow-x: scroll;">{{ notification.text }}</span>
@@ -586,6 +586,13 @@
       textSpan.textContent = 'Processing';
       document.getElementById(divId).appendChild(textSpan);
     }
+    function deleteRecord(deleteText, deleteURL){
+      deleteTextSpan = document.getElementById('id-delete-text');
+      deleteTextSpan.innerHTML = deleteText;
+      console.log(deleteURL);
+      deleteButton = document.getElementById('id-delete-btn');
+      deleteButton.href=deleteURL;
+    }
   </script>
   <script>
     const SELECTOR_SIDEBAR_WRAPPER = '.sidebar-wrapper';
@@ -634,7 +641,7 @@
 
       const notifDiv = document.getElementById('id-notif-div');
       if(strMsg.notif_area == 'F' || strMsg.notif_area == 'A'){
-        let link = "{% url 'fault-report-details' faultId=0  %}";
+        let link = "{% url 'fault-report-details' jobNumber=0  %}";
         var finalLink = link.replace('0', strMsg.fault_id);
       }
       else if(strMsg.notif_area == 'Q'){

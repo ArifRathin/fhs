@@ -71,6 +71,34 @@
                     </div>
                 </div>
                 <div class="row mt-2">
+                    <div class="col-md-6">
+                        <p class="fw-bold mb-0">Job Number</p>
+                        <span>
+                            {{ fault_report.job_number }}
+                        </span>
+                    </div>
+                    <div class="col-md-3">
+                        <p class="fw-bold mb-0">Purchase Order Number</p>
+                        <span>
+                            {% if fault_report.po_number == None %}
+                                -
+                            {% else %}
+                                {{ fault_report.po_number }}
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="col-md-3">
+                        <p class="fw-bold mb-0">If Recall</p>
+                        <span>
+                            {% if fault_report.if_recall == True %}
+                                Yes
+                            {% else %}
+                                No
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="row mt-2">
                     <p class="fw-bold mb-0">Job Type</p>
                     <span>
                         {% if fault_report.job_description != '' %}
@@ -150,6 +178,14 @@
                             <span class="text-success fw-bold">{{ assessment }}</span>
                         {% endif %}
                     </div>
+                    <div class="row mt-2">
+                        <p class="fw-bold mb-0">Completion Images</p>
+                        {% for image in fault_report.completionimage_set.all %}
+                            <div class="col-md-2 my-2">
+                                <img class="img img-fluid" src="/media/{{image.image}}" alt="">
+                            </div>
+                        {% endfor %}
+                    </div>
                 {% endif %}
                 <div class="row mt-3">
                     <div class="col-md-6">
@@ -168,8 +204,12 @@
                     </div>
                     <div class="col-md-6">
                         <p class="fw-bold mb-0">Location</p> 
-                        <span>{{ fault_report.location }}</span>
+                        <span>{{ fault_report.location.name }}</span>
                     </div>
+                </div>
+                <div class="row mt-2">
+                    <p class="fw-bold mb-0">Address</p>
+                    <span>{{ fault_report.address }}</span>
                 </div>
                 <div class="row mt-2">
                     <p class="fw-bold mb-0">Description</p>
@@ -179,7 +219,9 @@
                     <p class="fw-bold mb-0">Attached Images</p>
                     {% for image in fault_report.faultreportimage_set.all %}
                         <div class="col-md-2 my-2">
-                            <img class="img img-fluid" src="/media/{{image.image}}" alt="">
+                            <a target="_blank" href="/media/{{image.image}}">
+                                <img class="img img-fluid" src="/media/{{image.image}}" alt="">
+                            </a>
                         </div>
                     {% endfor %}
                 </div>

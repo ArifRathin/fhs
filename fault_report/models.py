@@ -8,13 +8,14 @@ from django.dispatch import receiver
 from fhs import email_sender
 from django.urls import reverse
 from django.conf import settings
+from address.models import Location
 # Create your models here.
 class ReportStatus(models.TextChoices):
     SUBMITTED = 'S', 'Submitted'
     QUOTE_SENT = 'QS', 'Quote sent'
     QUOTE_APPROVED = 'QA', 'Quote approved'
-    QUOTE_DISAPPROVED = 'QD', 'Quote disapproved'
-    QUOTE_CANCELED = 'QC', 'Quote disapproved'
+    # QUOTE_DISAPPROVED = 'QD', 'Quote disapproved'
+    QUOTE_CANCELED = 'QC', 'Quote canceled'
     ASSIGNED = 'A', 'Assigned',
     IN_PROGRESS = 'IP', 'In progress'
     PAUSED = 'P', 'Paused'
@@ -34,12 +35,15 @@ class TimeUnit(models.TextChoices):
 
 
 class FaultReport(models.Model):
-    fault_id = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=True)
+    job_number = models.CharField(max_length=10, default=None, null=True)
+    po_number = models.CharField(max_length=255, default=None, null=True, blank=True)
+    if_recall = models.BooleanField(default=False)
     user_technician = models.ManyToManyField(User, related_name='fault_report') # either a customer or a technician
     contact_name = models.CharField(max_length=255)
     contact_phone = models.CharField(max_length=20)
     contact_email = models.CharField(max_length=255)
-    location = models.TextField()
+    location = models.ForeignKey(Location, on_delete=models.CASCADE, default=None, null=True)
+    address = models.TextField()
     job = models.ForeignKey(Job, on_delete=models.CASCADE, default=None, null=True)
     job_description = models.CharField(max_length=255, default=None, null=True)
     priority_level = models.CharField(choices=PriorityLevel.choices, max_length=2, default=PriorityLevel.LOW)
@@ -56,6 +60,9 @@ class FaultReport(models.Model):
     is_assigned = models.BooleanField(default=False)
     completion_time = models.BigIntegerField(default=0)
     is_late = models.BooleanField(default=False)
+    sent_submission_email = models.BooleanField(default=False)
+    sent_assignment_email = models.BooleanField(default=False)
+    sent_completion_email = models.BooleanField(default=False)
 
 
 def saveFaultReportImage(instance, filename):
@@ -69,7 +76,7 @@ def saveFaultReportImage(instance, filename):
 
 
 def saveCompletionImage(instance, filename):
-    extension = filename.split('.')[:-1]
+    extension = filename.split('.')[-1]
     if instance.pk:
         filename = f'completion_{instance.pk}{uuid.uuid4().hex}.{extension}'
     else:
@@ -80,12 +87,16 @@ def saveCompletionImage(instance, filename):
 class FaultReportImage(models.Model):
     fault_report = models.ForeignKey(FaultReport, on_delete=models.CASCADE)
     image = models.ImageField(upload_to=saveFaultReportImage)
-    completion_image = models.ImageField(upload_to=saveCompletionImage, blank=True, default=None, null=True)
+
+
+class CompletionImage(models.Model):
+    fault_report = models.ForeignKey(FaultReport, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to=saveCompletionImage)
 
 
 @receiver(post_save, sender=FaultReport)
 def sendEmail(sender, instance, created, **kwargs):
-    if instance.status == 'S':
+    if instance.status == 'S' and instance.sent_submission_email==False:
         superAdmin = User.objects.filter(is_superadmin=True).first()
         to = []
         to.append(superAdmin.email)
@@ -93,19 +104,9 @@ def sendEmail(sender, instance, created, **kwargs):
         body = 'front-end/emails/submitted-report.html'
         context = {}
         email_sender.sendEmail.delay(subject=subject, body=body, to=to, context=context)
-    elif instance.status == 'C':
-        to = []
-        to.append(instance.contact_email)
-        subject = 'Task Completed'
-        body = 'front-end/emails/completed-task.html'
-        detailsLink = reverse('fault-report-details', args=[instance.fault_id])
-        detailsFullLink = f'{settings.BASIC_URL}{detailsLink}'
-        context = {
-            'receiver_name':instance.contact_name,
-            'details_full_link':detailsFullLink
-        }
-        email_sender.sendEmail.delay(subject=subject, body=body, to=to, context=context)
-    elif instance.status == 'A':
+        instance.sent_submission_email = True
+        instance.save()
+    elif instance.status == 'A' and instance.sent_assignment_email==False:
         for user in instance.user_technician.all():
             to = []
             to.append(user.email)
@@ -114,10 +115,27 @@ def sendEmail(sender, instance, created, **kwargs):
                 body = 'front-end/emails/assigned-task-user.html'
             elif user.is_technician == True:
                 body = 'front-end/emails/assigned-task-technician.html'
-            detailsLink = reverse('fault-report-details', args=[instance.fault_id])
+            detailsLink = reverse('fault-report-details', args=[instance.job_number])
             detailsFullLink = f'{settings.BASIC_URL}{detailsLink}'
             context = {
                 'receiver_name':f'{user.first_name} {user.last_name}',
                 'details_full_link':detailsFullLink
             }
             email_sender.sendEmail.delay(subject=subject, body=body, to=to, context=context)
+        instance.sent_assignment_email = True
+        instance.save()
+    elif instance.status == 'C' and instance.sent_completion_email == False:
+        to = []
+        to.append(instance.contact_email)
+        subject = 'Task Completed'
+        body = 'front-end/emails/completed-task.html'
+        detailsLink = reverse('fault-report-details', args=[instance.job_number])
+        detailsFullLink = f'{settings.BASIC_URL}{detailsLink}'
+        context = {
+            'receiver_name':instance.contact_name,
+            'details_full_link':detailsFullLink
+        }
+        email_sender.sendEmail.delay(subject=subject, body=body, to=to, context=context)
+        instance.sent_completion_email = True
+        instance.save()
+    

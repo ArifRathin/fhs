@@ -50,7 +50,8 @@
                 {% endfor %}
                 {% if request.user.is_admin %}
                 <div class="col-12 col-sm-6 col-md-4">
-                    <div class="info-box">
+                    <a class="text-decoration-none" href="{% url 'fault-reports' %}">
+                        <div class="info-box">
                         <span class="info-box-icon text-bg-primary shadow-sm">
                             <i class="bi bi-file-earmark-fill"></i>
                         </span>
@@ -63,8 +64,24 @@
                         <!-- /.info-box-content -->
                     </div>
                     <!-- /.info-box -->
+                    </a>
                 </div>
                 <!-- /.col -->
+                <div class="col-12 col-sm-6 col-md-4">
+                    <a class="text-decoration-none" href="{% url 'fault-reports-filter' status='Cot' priorityLevel='U' filterTimeType='all' startDate='all' endDate='all' %}">
+                        <div class="info-box">
+                        <span class="info-box-icon text-bg-danger shadow-sm">
+                            <i class="bi bi-calendar-check"></i>
+                        </span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Urgent jobs completed on time</span>
+                            <span class="info-box-number">{{ urge_com_on_time_perc }}%</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
+                    </a>
+                    <!-- /.info-box -->
+                </div>
                 <div class="col-12 col-sm-6 col-md-4">
                     <div class="info-box">
                         <span class="info-box-icon text-bg-secondary shadow-sm">
@@ -94,20 +111,6 @@
                 <!-- /.col -->
                 <!-- fix for small devices only -->
                 <!-- <div class="clearfix hidden-md-up"></div> -->
-                
-                <div class="col-12 col-sm-6 col-md-4">
-                    <div class="info-box">
-                        <span class="info-box-icon text-bg-danger shadow-sm">
-                            <i class="bi bi-calendar-check"></i>
-                        </span>
-                        <div class="info-box-content">
-                            <span class="info-box-text">Urgent jobs completed on time</span>
-                            <span class="info-box-number">{{ urge_com_on_time_perc }}%</span>
-                        </div>
-                        <!-- /.info-box-content -->
-                    </div>
-                    <!-- /.info-box -->
-                </div>
                 <!-- /.col -->
                 <div class="col-12 col-sm-6 col-md-4">
                     <div class="info-box">
@@ -164,6 +167,7 @@
                 </div>
                 {% elif request.user.is_enduser %}
                 <div class="col-12 col-sm-6 col-md-4">
+                        <a class="text-decoration-none" href="{% url 'fault-reports' %}">
                     <div class="info-box">
                         <span class="info-box-icon text-bg-primary shadow-sm">
                             <i class="bi bi-file-earmark"></i>
@@ -175,9 +179,11 @@
                         <!-- /.info-box-content -->
                     </div>
                     <!-- /.info-box -->
+                </a>
                 </div>
                 <div class="col-12 col-sm-6 col-md-4">
-                    <div class="info-box">
+                    <a class="text-decoration-none" href="{% url 'fault-reports-filter' status='C' filterTimeType='all' startDate='all' endDate='all'  %}">
+                        <div class="info-box">
                         <span class="info-box-icon text-bg-success shadow-sm">
                             <i class="bi bi-calendar2-check"></i>
                         </span>
@@ -188,6 +194,22 @@
                         <!-- /.info-box-content -->
                     </div>
                     <!-- /.info-box -->
+                    </a>
+                </div>
+                <div class="col-12 col-sm-6 col-md-4">
+                    <a class="text-decoration-none" href="{% url 'fault-reports-filter' status='Cot' filterTimeType='all' startDate='all' endDate='all' %}">
+                        <div class="info-box">
+                        <span class="info-box-icon text-bg-info shadow-sm">
+                            <i class="bi bi-clock"></i>
+                        </span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Completed on time</span>
+                            <span class="info-box-number">{{ comp_on_time }}</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
+                    <!-- /.info-box -->
+                    </a>
                 </div>
                 <div class="col-12 col-sm-6 col-md-4">
                     <div class="info-box">
@@ -197,19 +219,6 @@
                         <div class="info-box-content">
                             <span class="info-box-text">Completion percentage</span>
                             <span class="info-box-number">{{ total_comp_percentage }}%</span>
-                        </div>
-                        <!-- /.info-box-content -->
-                    </div>
-                    <!-- /.info-box -->
-                </div>
-                <div class="col-12 col-sm-6 col-md-4">
-                    <div class="info-box">
-                        <span class="info-box-icon text-bg-info shadow-sm">
-                            <i class="bi bi-clock"></i>
-                        </span>
-                        <div class="info-box-content">
-                            <span class="info-box-text">Completed on time</span>
-                            <span class="info-box-number">{{ comp_on_time }}</span>
                         </div>
                         <!-- /.info-box-content -->
                     </div>

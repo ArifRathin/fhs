@@ -12,13 +12,26 @@
       <!--begin::Row-->
       <div class="row">
         <div class="col-sm-6">
-          <h3 class="mb-0">Fault Reports</h3>
+          <h3 class="mb-0">{{ page_ }}</h3>
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
             <li class="breadcrumb-item"><a href="#">Home</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Fault Reports</li>
+            <li class="breadcrumb-item active" aria-current="page">{{ page_ }}</li>
           </ol>
+        </div>
+        <div class="col-12">
+          {% for message in messages %}
+            {% if message.extra_tags == 'success-fault-report' %}
+              <div class="alert text-white bg-success">
+                {{ message }}
+              </div>
+            {% elif message.extra_tags == 'error-fault-report' %}
+              <div class="alert text-white bg-danger">
+                {{ message }}
+              </div>
+            {% endif %}
+          {% endfor %}
         </div>
       </div>
       <!--end::Row-->
@@ -34,9 +47,39 @@
       <div class="row">
         <div class="col-md-12">
           <!-- /.card -->
+           
           <div class="card mb-4">
             <!-- /.card-header -->
             <div class="card-body p-1">
+              <span class="text-muted">Filter by</span>
+              <a class="btn btn-sm btn-dark dropdown-toggle mt-1 ms-2" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ status_name }}
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li><a class="dropdown-item {% if status == 'All' %}active{% endif %}" href="{% url 'fault-reports-filter' status='All' priorityLevel=priority_level filterTimeType=filter_time_type startDate=start_date endDate=end_date %}">All</a></li>
+                {% for value, label in statuses %}
+                  {% if value != 'PS' %}
+                    <li><a class="dropdown-item {% if value == status %}active{% endif %}" href="{% url 'fault-reports-filter' status=value priorityLevel=priority_level filterTimeType=filter_time_type startDate=start_date endDate=end_date %}">{{ label }}</a></li>
+                  {% endif %}
+                {% endfor %}
+                <li><a class="dropdown-item {% if status == 'Cot' %}active{% endif %}" href="{% url 'fault-reports-filter' status='Cot' priorityLevel=priority_level filterTimeType=filter_time_type startDate=start_date endDate=end_date %}">Completed on time</a></li>
+              </ul>
+              <a class="btn btn-sm btn-dark dropdown-toggle mt-1 ms-2" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ priority_level_name }}
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li><a class="dropdown-item {% if priority_level == 'all' %}active{% endif %}" href="{% url 'fault-reports-filter' status=status priorityLevel='all' filterTimeType=filter_time_type startDate=start_date endDate=end_date %}">All Priorities</a></li>
+                {% for value, label in priority_levels %}
+                    <li><a class="dropdown-item {% if value == priority_level %}active{% endif %}" href="{% url 'fault-reports-filter' status=status priorityLevel=value filterTimeType=filter_time_type startDate=start_date endDate=end_date %}">{{ label }}</a></li>
+                {% endfor %}
+              </ul>
+              <a class="btn btn-sm {% if filter_time_type == 'all' %} btn-dark {% else %} btn-outline-dark {% endif %} mt-1" href="{% url 'fault-reports-filter' status=status priorityLevel=priority_level filterTimeType='all' startDate='all' endDate='all' %}">All Time</a>
+              <a class="btn btn-sm {% if filter_time_type == '1' %} btn-dark {% else %} btn-outline-dark {% endif %} mt-1" href="{% url 'fault-reports-filter' status=status priorityLevel=priority_level filterTimeType='1' startDate='all' endDate='all' %}">1 Day</a>
+              <a class="btn btn-sm {% if filter_time_type == '7' %} btn-dark {% else %} btn-outline-dark {% endif %} mt-1" href="{% url 'fault-reports-filter' status=status priorityLevel=priority_level filterTimeType='7' startDate='all' endDate='all' %}">7 Days</a>
+              <a class="btn btn-sm {% if filter_time_type == '30' %} btn-dark {% else %} btn-outline-dark {% endif %} mt-1" href="{% url 'fault-reports-filter' status=status priorityLevel=priority_level filterTimeType='30' startDate='all' endDate='all' %}">30 Days</a>
+              <a class="btn btn-sm {% if filter_time_type == '365' %} btn-dark {% else %} btn-outline-dark {% endif %} mt-1" href="{% url 'fault-reports-filter' status=status priorityLevel=priority_level filterTimeType='365' startDate='all' endDate='all' %}">365 days</a>
+              <a type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-sm {% if filter_time_type == 'date' %}btn-dark{% else %}btn-outline-dark{% endif %} mt-1">Custom Date</a>
+              
               <table id="id-fault-report" class="table table-striped">
                 <thead>
                   <tr>
@@ -123,11 +166,14 @@
                     </td>
                     {% endif %}
                     <td>
-                      <a class="btn btn-sm btn-primary" href="{% url 'fault-report-details' faultId=fault.fault_id %}">View Details</a>
+                      <a class="text-primary" href="{% url 'fault-report-details' jobNumber=fault.job_number %}"><i class="bi bi-eye"></i></a>
                       {% if request.user.is_admin == True and perms.fault_report.change_faultreport %}
-                        <a class="btn btn-sm btn-primary" href="{% url 'edit-fault-report' faultReportId=fault.id %}">Update</a>
+                        <a class="text-primary" href="{% url 'edit-fault-report' faultReportId=fault.id %}"><i class="bi bi-pencil"></i></a>
                       {% endif %}
-                    </td>
+                      {% if request.user.is_admin and perms.fault_report.delete_faultreport %}
+                        <a type="button" data-bs-toggle="modal" data-bs-target="#deleteModal" class="text-danger" href="javascript:void(0)" onclick="deleteRecord('this fault report?', `{% url 'delete-fault-report' reportId=fault.id  %}`)"><i class="bi bi-trash"></i></a>
+                      {% endif %}
+                      </td>
                   </tr>
                   {% endfor %}
                 </tbody>
@@ -143,7 +189,34 @@
       <!--end::Row-->
     </div>
     <!--end::Container-->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Filter by date</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form class="form-group" action="{% url 'fault-reports-filter' %}" method="POST">
+        {% csrf_token %}
+      <div class="modal-body">
+          <input type="hidden" name="status" value="{{ status }}">
+          <input type="hidden" name="priority-level" value="{{ priority_level }}">
+          <input type="hidden" name="filter-time-type" value="date">
+          <label for="" class="form-label mb-0">Start Date</label>
+          <input required name="start-date" class="form-control mb-3 mt-0" type="datetime-local" value="{{ start_date }}">
+          <label for="" class="form-label mb-0">End Date</label>
+          <input required name="end-date" class="form-control" type="datetime-local" value="{{ end_date }}">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Filter</button>
+        </div>
+      </form>
+    </div>
   </div>
+</div>
+{% include 'base-front-end/modals/delete-modal.html' %}    
+</div>
   <!--end::App Content-->
 </main>
 <!--end::App Main-->

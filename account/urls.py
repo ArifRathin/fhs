@@ -9,6 +9,7 @@ urlpatterns = [
     path('create-admin-internal/<str:type>', views_admin.createAdmin, name='create-admin-internal'),
     path('edit-admin/<int:adminId>', views_admin.editAdmin, name='edit-admin'),
     path('edit-admin/', views_admin.editAdmin, name='edit-admin'),
+    path('delete-admin/<int:adminId>', views_admin.deleteAdmin, name='delete-admin'),
     path('admin-list/', views_admin.adminList, name='admin-list'),
     path('login-user/', views_admin.loginUser, name='login-user'),
     path('logout-admin/', views_admin.logoutAdmin, name='logout-admin'),
@@ -29,7 +30,10 @@ urlpatterns = [
     path('send-change-password-link/', views_enduser.sendChangePasswordLink, name='send-change-password-link'),
     path('change-password/<str:code>', views_enduser.changePassword, name='change-password'),
     path('change-password/', views_enduser.changePassword, name='change-password'),
+    path('get-loc-from-org/', views_enduser.getLocFromOrg, name='get-loc-from-org'),
 
     # Fault Reports URLs
-    path('fault-reports/', views_fault_reports.faultReportList, name='fault-reports')
+    path('fault-reports/', views_fault_reports.faultReportList, name='fault-reports'),
+    path('fault-reports-filter/<str:status>/<str:priorityLevel>/<str:filterTimeType>/<str:startDate>/<str:endDate>', views_fault_reports.faultReportsFilter, name='fault-reports-filter'),
+    path('fault-reports-filter/', views_fault_reports.faultReportsFilter, name='fault-reports-filter')
 ]

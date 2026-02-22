@@ -3,6 +3,17 @@
 <p class="register-box-msg">Log In</p>
 <form action="{% url 'login-user' %}" method="post" onsubmit="hideButton('id-log-in', 'id-log-in-div')">
     {% csrf_token %}
+    {% for message in messages %}
+        {% if message.extra_tags == 'success-login-user' %}
+            <div class="callout callout-success">
+                {{ message }}
+            </div>
+        {% elif message.extra_tags == 'error-login-user' %}
+            <div class="callout callout-danger">
+                {{ message }}
+            </div>
+        {% endif %}
+    {% endfor %}
     <div class="input-group mb-1">
         <div class="form-floating">
             <input required id="registerEmail" type="email" name="email" class="form-control" placeholder="" />
