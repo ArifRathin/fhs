@@ -67,6 +67,7 @@
                     <span>{{ quotation.fault_report.contact_phone }}</span><br>
                   </div>
                   <div class="col-md-6 text-end">
+                    <span class="h5">Job# {{ quotation.fault_report.job_number }}</span><br>
                     <span class="h5">Ref# {{ quotation.quote_ref_num }}</span><br>
                     <span class="h6">{{ quotation.created_at|date:"d F, Y" }}</span><br>
                     <!-- {% if quotation.payment_status == 'U' %}
@@ -134,7 +135,7 @@
                   </div>
                   <div class="row mb-2">
                     <div class="col-md-12 text-end">
-                      <a class="btn btn-primary" href="{% url 'fault-report-details' faultId=quotation.fault_report.fault_id %}">Show fault report</a>
+                      <a class="btn btn-primary" href="{% url 'fault-report-details' jobNumber=quotation.fault_report.job_number %}">Show fault report</a>
                       {% if quotation.approval_status != 'QC' %}
                         {% if quotation.is_sent == False and quotation.approval_status != 'QA' %}
                           <a class="btn btn-primary" href="{% url 'send-quotation' quoteRefNum=quotation.quote_ref_num %}">Send to client</a>

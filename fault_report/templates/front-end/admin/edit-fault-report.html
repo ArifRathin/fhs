@@ -217,11 +217,9 @@
               <!--begin::Footer-->
               <div id="id-update-report-div" class="card-footer">
                 <button id="id-update-report" type="submit" class="btn btn-primary">Update</button>
-                {% if fault.status == 'S' or fault.status == 'QC' %}
                   <a href="{% url 'create-quotation' faultReportId=fault.id %}" class="btn btn-primary">Create
                     Quotation
                   </a>
-                {% endif %}
               </div>
               <!--end::Footer-->
             </form>
