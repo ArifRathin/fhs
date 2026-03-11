@@ -48,7 +48,7 @@ def send_to_consumer(sender, instance, created, **kwargs):
                     'text':instance.text,
                     'notif_for_id':instance.notif_for_id,
                     'notif_area':instance.notif_area,
-                    'fault_report_id':str(instance.fault_report.fault_id),
+                    # 'fault_report_id':str(instance.fault_report.fault_id),
                     'quotation':instance.quotation.id,
                     'is_opened':instance.is_opened,
                     'is_admin':isAdmin,

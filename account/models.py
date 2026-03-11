@@ -46,7 +46,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.CharField(max_length=255, unique=True)
     phone = models.CharField(max_length=20, unique=True)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, default=None, null=True)
+    organization_name = models.CharField(max_length=255, default=None, null=True)
     user_location = models.ManyToManyField(Location, related_name='user_location')
+    location_name = models.TextField(default=None, null=True)
 
     account_activation_code = models.CharField(max_length=255, default=None, null=True)
     change_password_code = models.CharField(max_length=255, default=None, null=True)

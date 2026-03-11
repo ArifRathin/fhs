@@ -69,7 +69,7 @@
                     {% endif %}
                     <div class="col-6">
                         <p class="fw-bold mb-0">Total Bill</p>
-                        <span class="fw-bold text-muted">{{ total_bill }}<i class="bi bi-currency-pound"></i></span>
+                        <span class="fw-bold text-muted">{% if total_bill == None %}0{% else %}{{ total_bill }}{% endif %}<i class="bi bi-currency-pound"></i></span>
                     </div>
                 </div>
               </div>

@@ -34,6 +34,19 @@
     <div class="container-fluid">
       <!--begin::Row-->
       <div class="row">
+        <div class="col-12 my-3">
+          {% for message in messages %}
+            {% if message.extra_tags == 'success-create-user' or message.extra_tags == 'success-delete-user' %}
+              <div class="callout callout-success">
+                {{ message }}
+              </div>
+            {% elif message.extra_tags == 'error-create-user' or message.extra_tags == 'error-delete-user' %}
+              <div class="callout callout-danger">
+                {{ message }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
         <div class="col-md-12">
           <!-- /.card -->
           <div class="card mb-4">
@@ -44,15 +57,20 @@
                   <tr>
                     <th>Name</th>
                     <th>Total Reports</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {% for customer in customers %}
                     <tr class="align-middle">
                       <td>
-                        <a class="text-muted fw-bold" title="Customer history" href="{% url 'customer-history' customerEmail=customer.contact_email %}">{{ customer.contact_email }}</a>
+                        <a class="text-muted fw-bold" title="Customer history" href="{% url 'customer-history' customerEmail=customer.email %}">{{ customer.email }}</a>
                       </td>
-                      <td>{{ customer.total_reports }}</td>
+                      <td>{{ customer.count }}</td>
+                      <td>
+                        <a href="{% url 'edit-enduser' email=customer.email %}"><i class="bi bi-pencil"></i></a>
+                        <a type="button" data-bs-toggle="modal" data-bs-target="#deleteModal" class="text-danger" href="javascript:void(0)" onclick="deleteRecord('this customer?', `{% url 'delete-enduser' email=customer.email %}`)"><i class="bi bi-trash"></i></a>
+                      </td>
                     </tr>
                   {% endfor %}
                 </tbody>
@@ -68,6 +86,7 @@
       <!--end::Row-->
     </div>
     <!--end::Container-->
+    {% include 'base-front-end/modals/delete-modal.html' %} 
   </div>
   <!--end::App Content-->
 </main>

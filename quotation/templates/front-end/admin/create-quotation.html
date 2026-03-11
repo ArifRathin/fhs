@@ -128,18 +128,19 @@
   }
 
   function removeRow(rowNum){
-    alert(rowNum);
+    // alert(rowNum);
     $('#id-row'+rowNum).remove();
     itemIndex = rowsArr.indexOf(rowNum);
     if(itemIndex > -1){
       rowsArr.splice(itemIndex, 1);
     }
     totalRows -= 1;
-    alert(totalRows);
-    alert(rowsArr[0]);
+    // alert(totalRows);
+    // alert(rowsArr[0]);
     if(totalRows==1){
       $('#id-rmv-btn'+rowsArr[0]).remove();
     }
+    calculate();
   }
 
   function calculate(fromSalesTax=0, serialNum=0){

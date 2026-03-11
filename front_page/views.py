@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.contrib.auth.decorators import permission_required
 from .models import FrontPage, CustomerReview, Team
 from django.contrib import messages
 from account.models import User
 from notification.models import Notification
+from fhs.image_processor import processImage
 # Create your views here.
+@permission_required('front_page.change_frontpage', login_url='login-user', raise_exception=True)
 def updateFrontPage(request):
     frontPage = FrontPage.objects.all().first()
     if request.method == 'POST':
@@ -31,20 +33,20 @@ def updateFrontPage(request):
                     frontPage.about_us = aboutUs
                 frontPage.save()
             else:
-                frontPage = FrontPage.objects.create(logo=logo, banner_image=bannerImage, contact_email=contactEmail, contact_phone = contactPhone, contact_address = contactAddress, about_us = aboutUs)
+                processedLogo = processImage(logo)
+                processedBanner = processImage(bannerImage)
+                frontPage = FrontPage.objects.create(logo=processedLogo, banner_image=processedBanner, contact_email=contactEmail, contact_phone = contactPhone, contact_address = contactAddress, about_us = aboutUs)
             messages.success(request, 'Successfully updated.', extra_tags='success-update-fp')
         except:
             messages.success(request, 'Something went wrong!', extra_tags='error-update-fp')
         return redirect(request.META['HTTP_REFERER'])
     
     elif request.method == 'GET':
-        notifications = Notification.objects.filter(notif_for_id=request.user.id).order_by('-id')
-        page_ = 'Update Front Page'
-        sub_menu = 'Setting'
+        notifications = Notification.objects.filter(is_opened=False, notif_for_id=request.user.id).order_by('-id')
         data = {
             'notifications':notifications,
-            'page_':page_,
-            'sub_menu':sub_menu,
+            'page_':'Update Front Page',
+            'sub_menu':'Setting',
             'front_page':frontPage
         }
         return render(request, 'admin/update-front-page.html', data)
@@ -75,8 +77,9 @@ def createCustomerReview(request):
     return render(request, 'base-front-end/enduser/add-customer-review.html', data)
 
 
+@permission_required('front_page.view_customerreview', login_url='login-user', raise_exception=True)
 def customerReviews(request):
-    notifications = Notification.objects.filter(notif_for_id=request.user.id).order_by('-id')
+    notifications = Notification.objects.filter(is_opened=False, notif_for_id=request.user.id).order_by('-id')
     customerReviews = CustomerReview.objects.all()
     page_ = 'Customer Reviews'
     sub_menu = 'Setting'

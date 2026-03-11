@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from account.models import User
 from .models import ReportStatus, PriorityLevel, TimeUnit, FaultReport, FaultReportImage, CompletionImage
 from job.models import Job
@@ -117,7 +117,7 @@ def createFaultReport(request):
             messages.error(request, 'Could not create fault report.', extra_tags='error-create-report')
             return redirect(request.META['HTTP_REFERER'])
         except Exception as e:
-            messages.error(request, "Something went wrong!", extra_tags='error-create-report')
+            messages.error(request, str(e), extra_tags='error-create-report')
             return redirect(request.META['HTTP_REFERER'])
     
     jobs = Job.objects.all()
@@ -314,7 +314,7 @@ def faultReportsFilter(request, status='All', priorityLevel='all', filterTimeTyp
     return render(request, 'front-end/admin/fault-reports.html', data)
 
 
-@login_required(login_url='login-user')
+@permission_required('fault_report.change_faultreport', login_url='login-user')
 def editFaultReport(request, faultReportId=0):
     if request.method == 'POST':
         faultReportId = request.POST.get('fault-report-id').strip()
@@ -379,7 +379,10 @@ def editFaultReport(request, faultReportId=0):
         secondsTaken = None
         assessment = None
         if faultReport.started_at != None:
-            deadline = faultReport.started_at + timedelta(hours=2)
+            if faultReport.deadline_time_unit == 'H':
+                deadline = faultReport.started_at + timedelta(hours=faultReport.deadline)
+            elif faultReport.deadline_time_unit == 'D':
+                deadline = faultReport.started_at + timedelta(days=faultReport.deadline)
         if faultReport.completed_at != None:
             timeDiff = faultReport.completed_at - faultReport.started_at
             secondsTaken = int(timeDiff.total_seconds())
@@ -453,7 +456,7 @@ def editFaultReport(request, faultReportId=0):
     return redirect(request.META['HTTP_REFERER'])
 
 
-@login_required(login_url='login-user')
+@permission_required('fault_report.delete_faultreport', login_url='login-user', raise_exception=True)
 def deleteFaultReport(request, reportId):
     if request.user.is_admin and request.user.has_perm('fault_report.delete_faultreport'):
         try:
@@ -474,7 +477,7 @@ def deleteFaultReport(request, reportId):
         return redirect(request.META['HTTP_REFERER'])
 
 
-@login_required(login_url='login-user')
+@permission_required('fault_report.change_faultreport', login_url='login-user', raise_exception=True)
 def assignATechnician(request):
     try:
         with transaction.atomic():
@@ -528,7 +531,7 @@ def assignATechnician(request):
     return redirect(request.META['HTTP_REFERER'])
     
 
-@login_required(login_url='login-user')
+@permission_required('fault_report.change_faultreport', login_url='login-user', raise_exception=True)
 def startTask(request, jobNumber):
     faultReport = FaultReport.objects.get(job_number=jobNumber)
     if faultReport.is_assigned == True:
@@ -544,7 +547,7 @@ def startTask(request, jobNumber):
     return redirect(request.META['HTTP_REFERER'])
 
 
-@login_required(login_url='login-user')
+@permission_required('fault_report.change_faultreport', login_url='login-user', raise_exception=True)
 def pauseTask(request, jobNumber):
     faultReport = FaultReport.objects.get(job_number=jobNumber)
     if faultReport.status == 'IP':
@@ -559,7 +562,7 @@ def pauseTask(request, jobNumber):
     return redirect(request.META['HTTP_REFERER'])
 
 
-@login_required(login_url='login-user')
+@permission_required('fault_report.change_faultreport', login_url='login-user', raise_exception=True)
 def resumeTask(request, jobNumber):
     faultReport = FaultReport.objects.get(job_number=jobNumber)
     if faultReport.status == 'P':
@@ -574,7 +577,7 @@ def resumeTask(request, jobNumber):
     return redirect(request.META['HTTP_REFERER'])
 
 
-@login_required(login_url='login-user')
+@permission_required('fault_report.change_faultreport', login_url='login-user', raise_exception=True)
 def completeTask(request, jobNumber):
     if FaultReport.objects.filter(job_number=jobNumber).exists():
         faultReport = FaultReport.objects.get(job_number=jobNumber)

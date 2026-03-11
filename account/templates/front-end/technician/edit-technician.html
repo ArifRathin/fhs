@@ -78,6 +78,12 @@
                   <label for="" class="form-label">Retype Password</label>
                   <input type="password" name="retype-password" value="" class="form-control" id="" aria-describedby="adminPhone" />
                 </div>
+                <div class="mb-3">
+                  <input type="radio" name="is-active" value="1" {% if technician.is_active == True %}checked{% endif %} />
+                  <label for="" class="form-label">Active</label>
+                  <input type="radio" name="is-active" value="0" {% if technician.is_active == False %}checked{% endif %} />
+                  <label for="" class="form-label">Inactive</label>
+                </div>
               </div>
               <!--end::Body-->
               <!--begin::Footer-->

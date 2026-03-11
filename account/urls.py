@@ -21,9 +21,14 @@ urlpatterns = [
     path('technician-list/', views_technician.technicianList, name='technician-list'),
     path('edit-technician/<int:technicianId>', views_technician.editTechnician, name='edit-technician'),
     path('edit-technician/', views_technician.editTechnician, name='edit-technician'),
+    path('delete-technician/<int:technicianId>', views_technician.deleteTechnician, name='delete-technician' ),
 
     # End-user URLs
     path('create-enduser/', views_enduser.createEndUser, name='create-enduser'),
+    path('create-enduser/<str:email>', views_enduser.createEndUser, name='create-enduser'),
+    path('edit-enduser/', views_enduser.editEndUser, name='edit-enduser'),
+    path('edit-enduser/<str:email>', views_enduser.editEndUser, name='edit-enduser'),
+    path('delete-enduser/<str:email>', views_enduser.deleteEndUser, name='delete-enduser'),
     path('activate-account/<str:code>', views_enduser.activateAccount, name='activate-account'),
     path('customer-list/', views_enduser.customerList, name='customer-list'),
     path('customer-history/<str:customerEmail>', views_enduser.customerHistory, name='customer-history'),

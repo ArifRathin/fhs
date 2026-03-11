@@ -5,11 +5,12 @@ from fault_report.models import FaultReport
 from front_page.models import FrontPage
 from django.db.models import Q, Avg
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.models import Permission
 from django.contrib import messages
 from .views_enduser import generateRandomStr
 # Create your views here.
+@permission_required('account.add_user', login_url='login-user', raise_exception=True)
 def createAdmin(request, type='external'):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -64,6 +65,7 @@ def createAdmin(request, type='external'):
     return render(request, 'front-end/admin/create-admin.html')
 
 
+@permission_required('account.change_user', login_url='login-user', raise_exception=True)
 def editAdmin(request, adminId=0):
     if request.method == 'POST':
         adminId = request.POST.get('admin-id')
@@ -120,6 +122,7 @@ def editAdmin(request, adminId=0):
     return redirect(request.META['HTTP_REFERER'])
 
 
+@permission_required('account.view_user', login_url='login-user', raise_exception=True)
 def adminList(request):
     notifications = Notification.objects.filter(is_opened=False, notif_for_id=request.user.id).order_by('-id')
     admins = User.objects.filter(is_admin=True).all()
@@ -136,6 +139,7 @@ def adminList(request):
     return render(request, 'front-end/admin/admin-list.html', data)
 
 
+@permission_required('account.delete_user', login_url='login-user', raise_exception=True)
 def deleteAdmin(request, adminId):
     if request.user.has_perm('account.delete_user'):
         try:
@@ -198,12 +202,11 @@ def home(request):
     if request.user.is_admin == True:
         totalFaultsReported = FaultReport.objects.count()
         avgCompletionTime = FaultReport.objects.aggregate(Avg('completion_time'))
-        avgCompletionTime = 0
         daysTakenAvg = 0
         hoursTakenAvg = 0
         minutesTakenAvg = 0
         secondsTakenAvg = 0
-        if avgCompletionTime > 0:
+        if avgCompletionTime['completion_time__avg'] > 0:
             avgCompletionTime = int(avgCompletionTime['completion_time__avg'])
             daysTakenAvg = avgCompletionTime//86400
             remSeconds = avgCompletionTime%86400
@@ -226,6 +229,8 @@ def home(request):
             totalCompOnTimePerc = 0
         data = {
             'notifications':notifications,
+            'sub_menu':'Dashboard',
+            'page_':'Admin Dashboard',
             'total_faults_reported':totalFaultsReported,
             'days_taken_avg' : daysTakenAvg,
             'hours_taken_avg' : hoursTakenAvg,
@@ -242,6 +247,8 @@ def home(request):
             completionPercentage = round((totalTasksCompleted/totalTasksAssigned)*100, 2)
         data = {
             'notifications':notifications,
+            'page_':'Customer Dashboard',
+            'sub_menu':'Dashboard',
             'total_tasks_assigned':totalTasksAssigned,
             'total_tasks_completed':totalTasksCompleted,
             'completion_percentage':completionPercentage
@@ -257,6 +264,8 @@ def home(request):
             compOnTimePerc = round((compOnTime/totalCompleted)*100, 2)
         data={
             'notifications':notifications,
+            'sub_menu':'Dashboard',
+            'page_':'Customer Dashboard',
             'total_fault_reports':totalFaultReports,
             'total_completed':totalCompleted,
             'total_comp_percentage':totalCompPercentage,
@@ -272,23 +281,33 @@ def logoutAdmin(request):
     return redirect('login-user')
 
 
+@permission_required('auth.add_permission', login_url='login-user', raise_exception=True)
 def permissionList(request, adminId):
+    notifications = Notification.objects.filter(is_opened=False, notif_for_id=request.user.id).order_by('-id')
     admin = User.objects.get(id=adminId)
     allPermissions = Permission.objects.all()
     data = {
+        'notifications':notifications,
         'admin':admin,
-        'permissions':allPermissions
+        'permissions':allPermissions,
+        'page_':'Update Permissions',
+        'sub_menu':'Admins'
     }
     return render(request, 'front-end/admin/permission-list.html', data)
 
 
+@permission_required('auth.change_permission', login_url='login-user', raise_exception=True)
 def updatePermissions(request):
     adminId = request.POST.get('admin-id')
-    admin = User.objects.get(id=adminId)
+    try:
+        admin = User.objects.get(id=adminId)
 
-    permissionList = request.POST.getlist('permissions')
-    permissions = Permission.objects.filter(id__in=permissionList)
+        permissionList = request.POST.getlist('permissions')
+        permissions = Permission.objects.filter(id__in=permissionList)
 
-    admin.user_permissions.set(permissions)
+        admin.user_permissions.set(permissions)
+        messages.error(request, 'Permissions updated', extra_tags='success-permit-admin')
+    except:
+        messages.error(request, 'Something went wrong!', extra_tags='error-permit-admin')
 
     return redirect(request.META['HTTP_REFERER'])

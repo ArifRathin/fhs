@@ -6,6 +6,8 @@ from django.core.files import File
 def processImage(photo):
     try:
         image = Image.open(photo)
+        if image.mode in ("RGBA", "P"):
+            image = image.convert("RGB")
         width = image.width
         height = image.height
         if width >= height:

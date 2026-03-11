@@ -1,4 +1,9 @@
 {% extends 'base-front-end/admin/base.html' %}
+{% block title %}
+    <title>
+        {{ page_ }}
+    </title>
+{% endblock %}
 {% block content %}
 <!--begin::App Main-->
 <main class="app-main">
@@ -9,12 +14,12 @@
             <!--begin::Row-->
             <div class="row">
                 <div class="col-sm-6">
-                    <h3 class="mb-0">Update Permissions</h3>
+                    <h3 class="mb-0">{{ page_ }}</h3>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-end">
                         <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Update Permissions</li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ page_ }}</li>
                     </ol>
                 </div>
             </div>
@@ -31,9 +36,17 @@
             <div class="row g-4">
                 <!--begin::Col-->
                 <div class="col-12">
-                    <div class="callout callout-info">
-                        Alert message
-                    </div>
+                    {% for message in messages %}
+                        {% if message.extra_tags == 'success-permit-admin' %}
+                            <div class="callout callout-success">
+                                {{ message }}
+                            </div>
+                        {% elif message.extra_tags == 'error-permit-admin' %}
+                            <div class="callout callout-danger">
+                                {{ message }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
                 </div>
                 <!--end::Col-->
                 <!--begin::Col-->

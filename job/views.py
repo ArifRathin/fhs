@@ -23,7 +23,7 @@ def createJob(request):
             except Exception as e:
                 messages.error(request, 'Something went wrong!', extra_tags='error-create-job')
             return redirect(request.META['HTTP_REFERER'])
-        notifications = Notification.objects.filter(notif_for_id=request.user.id).order_by('-id')
+        notifications = Notification.objects.filter(is_opened=False, notif_for_id=request.user.id).order_by('-id')
         sub_menu = 'Job'
         page_ = 'Create Job'
         data = {
@@ -40,7 +40,7 @@ def createJob(request):
 def jobList(request):
     if request.user.is_admin and request.user.has_perm('job.view_job'):
         jobs = Job.objects.all()
-        notifications = Notification.objects.filter(notif_for_id=request.user.id).order_by('-id')
+        notifications = Notification.objects.filter(is_opened=False, notif_for_id=request.user.id).order_by('-id')
         sub_menu = 'Job'
         page_ = 'Job List'
         data = {
@@ -54,6 +54,7 @@ def jobList(request):
         return render(request, 'no-permission.html')
 
 
+@login_required(login_url='login-user')
 def editJob(request, jobId=0):
     if request.user.is_admin and request.user.has_perm('job.change_job'):
         try:
@@ -70,8 +71,12 @@ def editJob(request, jobId=0):
                     isActive = False
             job = Job.objects.filter(id=jobId).get()
             if request.method == 'GET':
+                notifications = Notification.objects.filter(is_opened=False, notif_for_id=request.user.id).order_by('-id')
                 data={
-                    'job':job
+                    'notification':notifications,
+                    'job':job,
+                    'sub_menu':'Job',
+                    'page_':'Job List'
                 }
                 return render(request, 'front-end/edit-job.html', data)
             job.title = title
@@ -86,11 +91,12 @@ def editJob(request, jobId=0):
         return render(request, 'no-permission.html')
 
 
-def deleteJob(request):
-    jobId = request.POST.get('job-id')
-    job = Job.objects.filter(id=jobId).get()
+@login_required(login_url='login-user')
+def deleteJob(request, jobId):
     try:
+        job = Job.objects.get(id=jobId)
         job.delete()
-        return HttpResponse('Successfully deleted the job.')
+        messages.success(request, 'Successfully deleted the job.', extra_tags='success-delete-job')
     except:
-        return HttpResponse('Something went wrong!')
+        messages.error(request, 'Something went wrong!', extra_tags='error-delete-job')
+    return redirect(request.META['HTTP_REFERER'])

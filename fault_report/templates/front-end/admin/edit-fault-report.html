@@ -260,18 +260,18 @@
             </form>
           </div>
           {% if fault.started_at == None %}
-            <div id="id-start-task-div">
+            <div class="my-2" id="id-start-task-div">
               <a id="id-start-task" class="btn btn-primary form-control" href="{% url 'start-task' jobNumber=fault.job_number %}" onclick="hideButton('id-start-task', 'id-start-task-div')">Start Task</a>
             </div>
           {% else %}
-            <div id="id-resume-pause-task-div">
+            <div class="my-2" id="id-resume-pause-task-div">
               {% if fault.status == 'P' %}
                 <a id="id-resume-task" class="btn btn-primary form-control" href="{% url 'resume-task' jobNumber=fault.job_number %}" onclick="hideButton('id-resume-task', 'id-resume-pause-task-div')">Resume</a>
               {% elif fault.status == 'IP' %}
                 <a id="id-pause-task" class="btn btn-primary form-control" href="{% url 'pause-task' jobNumber=fault.job_number %}" onclick="hideButton('id-pause-task', 'id-resume-pause-task-div')">Pause</a>
               {% endif %}
             </div>
-            <div id="id-complete-task-div">
+            <div class="my-2" id="id-complete-task-div">
               {% if fault.status != 'C' %}
                 <a id="id-complete-task" class="btn btn-primary form-control" href="{% url 'complete-task' jobNumber=fault.job_number %}" onclick="hideButton('id-complete-task', 'id-complete-task-div')">Complete</a>
               {% endif %}

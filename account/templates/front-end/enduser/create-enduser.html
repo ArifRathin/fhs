@@ -40,23 +40,39 @@
     <div class="input-group mb-1">
         <div class="form-floating">
             <select class="form-control" name="organization-id" id="id-organization" onchange="getLocFromOrg()">
-                <option value="" style="font-style: italic;">Not an organization</option>
+                <option value="" class="fst-italic">Not an organization</option>
                 {% for organization in organizations %}
                     <option value="{{ organization.id }}">{{ organization.name }}</option>
                 {% endfor %}
+                <option value="other">Other</option>
             </select>
             <label for="registerEmail">Organization <small>(Optional)</small></label>
         </div>
         <div class="input-group-text"><span class="bi bi-building"></span></div>
     </div>
+    <div class="input-group mb-1 d-none" id="id-organization-name-div">
+        <div class="form-floating">
+            <input id="id-organization-name" type="text" name="organization-name" class="form-control" placeholder="" />
+            <label for="id-organization-name">Organization Name</label>
+        </div>
+        <div class="input-group-text"><span class="bi bi-building"></span></div>
+    </div>
     <div class="input-group mb-1">
         <div class="form-floating">
-            <select class="form-control" name="location-id" id="id-location">
+            <select class="form-control" name="location-id" id="id-location" onchange="setLocationName()">
                 {% for location in locations %}
                     <option value="{{ location.id }}">{{ location.name }}</option>
                 {% endfor %}
+                <option value="other">Other</option>
             </select>
             <label for="registerEmail">Location</label>
+        </div>
+        <div class="input-group-text"><span class="bi bi-pin-map"></span></div>
+    </div>
+    <div class="input-group mb-1 d-none" id="id-location-name-div">
+        <div class="form-floating">
+            <input id="id-location-name" type="text" name="location-name" class="form-control" placeholder="" />
+            <label for="id-location-name">Location Name</label>
         </div>
         <div class="input-group-text"><span class="bi bi-pin-map"></span></div>
     </div>
@@ -105,15 +121,31 @@ async function getLocFromOrg(){
     const orgElement = document.querySelector('#id-organization');
     const organizationId = orgElement.value;
     const locElement = document.querySelector('#id-location');
+    const organizationNameDiv = document.querySelector('#id-organization-name-div');
+    const organizationName = document.querySelector('#id-organization-name');
 
-    if(organizationId == ''){
+    if(organizationId == 'other'){
+        var options = '';
+        locationMap.forEach((name, id)=>{
+            options += `<option value='${id}'>${name}</option>`;
+        });
+        options += `<option value='other'>Other</option>`;
+        organizationNameDiv.classList.remove('d-none');
+        organizationName.required = true;
+    }
+    else if(organizationId == ''){
         var options = '';
         locationMap.forEach((name, id)=>{
             options += `<option value='${id}'>${name}</option>`
         });
+        options += `<option value='other'>Other</option>`;
         locElement.innerHTML=options;
+        organizationNameDiv.classList.add('d-none');
+        organizationName.required = false;
     }
     else{
+        organizationNameDiv.classList.add('d-none');
+        organizationName.required = false;
         const url = `{% url 'get-loc-from-org' %}?organizationId=${organizationId}`;
         try{
             const response = await fetch(url);
@@ -127,11 +159,27 @@ async function getLocFromOrg(){
             locations.forEach((loc)=>{
                 options += `<option value='${loc.id}'>${loc.name}</option>`;
             });
+            options += `<option value='other'>Other</option>`;
             locElement.innerHTML = options;
         }
         catch(error){
             console.log(error.message);
         }
+    }
+    setLocationName();
+}
+function setLocationName(){
+    const locationElement = document.querySelector('#id-location');
+    const locationId = locationElement.value;
+    const locationNameDiv = document.querySelector('#id-location-name-div');
+    const locationName = document.querySelector('#id-location-name');
+    if(locationId == 'other'){
+        locationNameDiv.classList.remove('d-none');
+        locationName.required = true;
+    }
+    else{
+        locationNameDiv.classList.add('d-none');
+        locationName.required = false;
     }
 }
 </script>

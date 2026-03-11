@@ -272,7 +272,7 @@
           <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="navigation"
             aria-label="Main navigation" data-accordion="false" id="navigation">
             {% if request.user.is_admin == True %}
-            <li class="nav-item">
+            <li class="nav-item {% if sub_menu == 'Dashboard' %}menu-open{% endif %}">
               <a href="{% url 'home' %}" class="nav-link">
                 <i class="nav-icon bi bi-speedometer"></i>
                 <p>
@@ -281,7 +281,7 @@
               </a>
             </li>
             {% elif request.user.is_technician == True %}
-            <li class="nav-item">
+            <li class="nav-item {% if sub_menu == 'Dashboard' %}menu-open{% endif %}">
               <a href="{% url 'home' %}" class="nav-link">
                 <i class="nav-icon bi bi-speedometer"></i>
                 <p>
@@ -290,7 +290,7 @@
               </a>
             </li>
             {% elif request.user.is_enduser == True %}
-            <li class="nav-item">
+            <li class="nav-item {% if sub_menu == 'Dashboard' %}menu-open{% endif %}">
               <a href="{% url 'home' %}" class="nav-link">
                 <i class="nav-icon bi bi-speedometer"></i>
                 <p>
@@ -398,6 +398,14 @@
                 </p>
               </a>
               <ul class="nav nav-treeview">
+                {% if perms.account.add_user %}
+                  <li class="nav-item">
+                    <a href="{% url 'create-enduser' %}" class="nav-link">
+                      <i class="nav-icon bi bi-circle{% if page_ == 'Create Customer' %}-fill{% endif %}"></i>
+                      <p>Create Customer</p>
+                    </a>
+                  </li>
+                {% endif %}
                 {% if perms.account.view_user %}
                   <li class="nav-item">
                     <a href="{% url 'customer-list' %}" class="nav-link">
@@ -509,22 +517,6 @@
                       </a>
                     </li>
                   {% endif %}
-                  {% if perms.front_page.add_team %}
-                    <li class="nav-item">
-                      <a href="{% url 'add-team-member' %}" class="nav-link">
-                        <i class="nav-icon bi bi-circle{% if page_ == 'Add team member' %}-fill{% endif %}"></i>
-                        <p>Add Team Member</p>
-                      </a>
-                    </li>
-                  {% endif %}
-                  {% if perms.front_page.view_team %}
-                    <li class="nav-item">
-                      <a href="{% url 'team-members' %}" class="nav-link">
-                        <i class="nav-icon bi bi-circle{% if page_ == 'Team Members' %}-fill{% endif %}"></i>
-                        <p>Team</p>
-                      </a>
-                    </li>
-                  {% endif %}
                   {% if perms.front_page.view_customerreview %}
                     <li class="nav-item">
                       <a href="{% url 'customer-reviews' %}" class="nav-link">
@@ -553,7 +545,7 @@
       <!--begin::Copyright-->
       <strong>
         Copyright &copy; 2026&nbsp;
-        <a href="{% url 'landing-page' %}" class="text-decoration-none">FHS Facilities</a>.
+        <a href="https://www.fhsfacilities.com" class="text-decoration-none">FHS Facilities</a>.
       </strong>
       All rights reserved.
       <!--end::Copyright-->
@@ -666,7 +658,7 @@
 
     async function updateNotifStatus(){
       const notifId = document.getElementById('id-notif-id').value;
-      alert(notifId);
+      // alert(notifId);
       const url = `{% url 'update-notif-status' %}?notif-id=${notifId}`;
       
       try{

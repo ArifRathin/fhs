@@ -1,7 +1,8 @@
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
+from notification.models import Notification
 from .models import User
-from fault_report.models import FaultReport, PriorityLevel, ReportStatus
+from fault_report.models import FaultReport, FaultReportImage, PriorityLevel, ReportStatus
 from front_page.models import FrontPage
 from django.db import transaction
 from django.contrib import messages
@@ -10,21 +11,27 @@ from fhs.email_sender import sendEmail
 from django.urls import reverse
 from django.conf import settings
 from django.contrib.auth import authenticate, login
-from django.db.models import Count
-from django.db.models import Sum
+from django.contrib.auth.decorators import login_required, permission_required
+from django.db.models import Sum, Count, F, Value
 from quotation.models import Quotation
 from address.models import Organization, Location
 
 
-def createEndUser(request):
+def createEndUser(request, email=None):
     if request.method == 'POST':
         email = request.POST.get('email').strip()
         phone = request.POST.get('phone').strip()
         if User.objects.filter(email=email).exists():
             messages.error(request, 'User already exists!', extra_tags='error-create-user')
             return redirect(request.META['HTTP_REFERER'])
+        elif email == '':
+            messages.error(request, 'Email is required!', extra_tags='error-create-user')
+            return redirect(request.META['HTTP_REFERER'])
         if User.objects.filter(phone=phone).exists():
             messages.error(request, 'Phone number already exists!', extra_tags='error-create-user')
+            return redirect(request.META['HTTP_REFERER'])
+        elif phone == '':
+            messages.error(request, 'Email is required!', extra_tags='error-create-user')
             return redirect(request.META['HTTP_REFERER'])
         password = request.POST.get('password')
         if len(password) < 6:
@@ -41,20 +48,31 @@ def createEndUser(request):
             messages.error(request, 'Both first name and last name are required.', extra_tags='error-create-user')
             return redirect(request.META['HTTP_REFERER'])
         locationId = request.POST.get('location-id').strip()
-        if Location.objects.filter(id=locationId).exists() == False:
+        if locationId == 'other':
+            locationName = request.POST.get('location-name').strip()
+            if len(locationName) == 0:
+                messages.error(request, 'Location name is invalid!', extra_tags='error-create-user')
+                redirect(request.META['HTTP_REFERER'])
+        elif Location.objects.filter(id=locationId).exists() == False:
             messages.error(request, 'Location is required!', extra_tags='error-create-user')
             redirect(request.META['HTTP_REFERER'])
         organizationId = request.POST.get('organization-id').strip()
-        if organizationId == '':
-            organizationId = None
-        else: 
-            if Organization.objects.filter(id=organizationId).exists() == False:
-                messages.error(request, 'Organization input is invalid!', extra_tags='error-create-user')
+        if organizationId == 'other':
+            organizationName = request.POST.get('organization-name').strip()
+            if len(organizationName) == 0:
+                messages.error(request, 'Organization name is invalid!', extra_tags='error-create-user')
                 redirect(request.META['HTTP_REFERER'])
+        elif organizationId != '' and Organization.objects.filter(id=organizationId).exists() == False:
+            messages.error(request, 'Organization input is invalid!', extra_tags='error-create-user')
+            redirect(request.META['HTTP_REFERER'])
+        elif organizationId == '':
+            organizationId = None
         try:
             with transaction.atomic():
                 user = User.objects.create_user(first_name=firstName, last_name=lastName, email=email, phone=phone, password=password)
                 user.is_enduser = True
+                if request.user.is_authenticated and request.user.is_admin:
+                    user.is_active = True
                 user.account_activation_code = generateRandomStr()
                 if user.id < 10:
                     toSub = 1
@@ -71,14 +89,24 @@ def createEndUser(request):
                     accountNumber += '0'
                 accountNumber += str(user.id)
                 user.account_number = accountNumber
-                user.organization_id = organizationId
-                user.user_location.set([locationId])
+                if organizationId == 'other':
+                    user.organization_name = organizationName
+                else:
+                    user.organization_id = organizationId
+                if locationId == 'other':
+                    user.location_name = locationName
+                else:
+                    user.user_location.set([locationId])
                 user.save()
                 fault_reports = FaultReport.objects.filter(contact_email=user.email)
                 for report in fault_reports:
                     report.user_technician.set([user.id])
-                messages.success(request, 'Please check your email to activate your account.', extra_tags='success-create-user')
-                return redirect(request.META['HTTP_REFERER'])
+                if request.user.is_authenticated and request.user.is_admin:
+                    messages.success(request, 'Successfully created customer.', extra_tags='success-create-user')
+                    return redirect('customer-list')
+                else:
+                    messages.success(request, 'Please check your email to activate your account.', extra_tags='success-create-user')
+                    return redirect(request.META['HTTP_REFERER'])
         except Exception as e:
             messages.error(request, str(e), extra_tags='error-create-user')
             return redirect(request.META['HTTP_REFERER'])
@@ -88,35 +116,176 @@ def createEndUser(request):
     data = {
         'front_page':frontPage,
         'organizations':organizations,
-        'locations':locations
+        'locations':locations,
+        'sub_menu':'Customers',
+        'page_':'Create Customer',
+        'email':email
     }
+    if request.user.is_authenticated and request.user.is_admin:
+        return render(request, 'front-end/admin/create-enduser-internal.html', data)
     return render(request, 'front-end/enduser/create-enduser.html', data)
 
 
+@permission_required('account.change_user', login_url='login-user', raise_exception=True)
+def editEndUser(request, email=None):
+    if request.method == 'POST':
+        accountNumber = request.POST.get('account-number').strip()
+        if accountNumber == '':
+            messages.error(request, 'Invalid input!', extra_tags='error-edit-user')
+            return redirect(request.META['HTTP_REFERER'])
+        elif not User.objects.filter(account_number=accountNumber).exists():
+            messages.error(request, 'Customer not found!', extra_tags='error-edit-user')
+            return redirect(request.META['HTTP_REFERER'])
+        customer = User.objects.filter(account_number=accountNumber).first()
+        email = request.POST.get('email').strip()
+        if email == '':
+            messages.error(request, 'Email is mandatory!', extra_tags='error-edit-user')
+            return redirect(request.META['HTTP_REFERER'])
+        elif User.objects.filter(email=email).exclude(account_number=accountNumber).exists():
+            messages.error(request, 'This email belongs to another account!', extra_tags='error-edit-user')
+            return redirect(request.META['HTTP_REFERER'])
+        phone = request.POST.get('phone').strip()
+        if phone == '':
+            messages.error(request, 'Phone number is mandatory!', extra_tags='error-edit-user')
+            return redirect(request.META['HTTP_REFERER'])
+        elif User.objects.filter(phone=phone).exclude(account_number=accountNumber).exists():
+            messages.error(request, 'This phone number belongs to another account!', extra_tags='error-edit-user')
+            return redirect(request.META['HTTP_REFERER'])
+        firstName = request.POST.get('first-name').strip()
+        if firstName == '':
+            messages.error(request, 'First name is mandatory!', extra_tags='error-edit-user')
+            return redirect(request.META['HTTP_REFERER'])
+        lastName = request.POST.get('last-name').strip()
+        if lastName == '':
+            messages.error(request, 'Last name is mandatory!', extra_tags='error-edit-user')
+            return redirect(request.META['HTTP_REFERER'])
+        organizationId = request.POST.get('organization-id').strip()
+        if organizationId == 'other':
+            organizationName = request.POST.get('organization-name').strip()
+            if len(organizationName) == 0:
+                messages.error(request, 'Organization name is invalid!', extra_tags='error-edit-user')
+                redirect(request.META['HTTP_REFERER'])
+        elif organizationId != '' and Organization.objects.filter(id=organizationId).exists() == False:
+            messages.error(request, 'Organization input is invalid!', extra_tags='error-edit-user')
+            redirect(request.META['HTTP_REFERER'])
+        elif organizationId == '':
+            organizationId = None
+        locationId = request.POST.get('location-id').strip()
+        if locationId == 'other':
+            locationName = request.POST.get('location-name').strip()
+            if len(locationName) == 0:
+                messages.error(request, 'Location name is invalid!', extra_tags='error-edit-user')
+                redirect(request.META['HTTP_REFERER'])
+        elif Location.objects.filter(id=locationId).exists() == False:
+            messages.error(request, 'Location is required!', extra_tags='error-edit-user')
+            redirect(request.META['HTTP_REFERER'])
+        isActive = request.POST.get('is-active').strip()
+        if isActive == '0':
+            isActive = False
+        elif isActive == '1':
+            isActive = True
+        else:
+            messages.error(request, 'Invalid input!', extra_tags='error-edit-user')
+            return redirect(request.META['HTTP_REFERER'])
+        password = request.POST.get('password').strip()
+        if password != '':
+            retypePassword = request.POST.get('retype-password').strip()
+            if password != retypePassword:
+                messages.error(request, "Passwords don't match!", extra_tags='error-edit-user')
+                return redirect(request.META['HTTP_REFERER'])
+            if len(password) < 6:
+                messages.error(request, 'Password has to be at least 6 characters!', extra_tags='error-edit-user')
+                return redirect(request.META['HTTP_REFERER'])
+
+    if request.method == 'GET':
+        customer = User.objects.filter(email=email).first()
+        if customer == None:
+            return redirect('create-enduser', email=email)
+        notifications = Notification.objects.filter(is_opened=False, notif_for_id=request.user.id).order_by('-id')
+        organizations = Organization.objects.filter(is_active=True)
+        locations = Location.objects.filter(is_active=True)
+        data = {
+            'notifications':notifications,
+            'organizations':organizations,
+            'locations':locations,
+            'email':email,
+            'customer':customer,
+            'sub_menu':'Customers',
+            'page_':'Edit Customer'
+        }
+    
+        return render(request, 'front-end/admin/edit-enduser-internal.html', data)
+    try:
+        with transaction.atomic():
+            customer.email = email
+            customer.phone = phone
+            customer.first_name = firstName
+            customer.last_name = lastName
+            customer.location_id = locationId
+            customer.organization_id = organizationId
+            customer.save()
+            if password != '':
+                customer.set_password(password)
+            messages.success(request, 'Successfully updated.', extra_tags='success-edit-user')
+            return redirect('edit-enduser', email=email)
+    except Exception as e:
+        messages.error(request, str(e), extra_tags='error-edit-user')
+        return redirect('edit-enduser', email=email)
+
+
+@permission_required('account.delete_user', login_url='login-user', raise_exception=True)
+def deleteEndUser(request, email):
+    try:
+        with transaction.atomic():
+            if User.objects.filter(email=email).exists():
+                User.objects.get(email=email).delete()
+            faultReports = FaultReport.objects.filter(contact_email=email)
+            for report in faultReports:
+                faultReportImages = FaultReportImage.objects.filter(fault_report_id=report.id)
+                for image in faultReportImages:
+                    image.image.delete(save=False)
+                    image.delete()
+                report.delete()
+            messages.success(request, 'Successfully deleted the customer.', extra_tags='success-delete-user')
+            return redirect(request.META['HTTP_REFERER'])
+    except:
+        messages.error(request, 'Something went wrong!', extra_tags='error-delete-user')
+        return redirect(request.META['HTTP_REFERER'])
+
+
 def activateAccount(request, code):
-    if User.objects.filter(account_activation_code=code).exists():
-        user = User.objects.get(account_activation_code=code)
-        user.is_active = True
-        user.account_activation_code = None
-        user.save()
-        messages.success(request, 'Account activated!', extra_tags='success-activate-account')
-        return redirect('home')
-    else:
-        messages.error(request, "This account doesn't exist", extra_tags='error-activate-account')
+    try:
+        if User.objects.filter(account_activation_code=code).exists():
+            user = User.objects.get(account_activation_code=code)
+            user.is_active = True
+            user.account_activation_code = None
+            user.save()
+            messages.success(request, 'Account activated!', extra_tags='success-activate-account')
+            return redirect('home')
+        else:
+            messages.error(request, "This account doesn't exist", extra_tags='error-activate-account')
+            return redirect('create-enduser')
+    except:
+        messages.error(request, "Something went wrong!", extra_tags='error-activate-account')
         return redirect('create-enduser')
 
-
+@permission_required('account.view_user', login_url='login-user', raise_exception=True)
 def customerList(request):
-    customers = FaultReport.objects.values('contact_email').annotate(total_reports=Count('contact_email')).order_by('-total_reports')
+    notifications = Notification.objects.filter(is_opened=False, notif_for_id=request.user.id).order_by('-id')
+    customersWithReports= FaultReport.objects.values(email=F('contact_email')).annotate(count=Count('id')).values('email', 'count')
+    customersWithoutReports = User.objects.exclude(email__in=FaultReport.objects.values('contact_email')).filter(is_enduser=True).values('email').annotate(count=Value(0)).values('email','count')
+    customers = customersWithReports.union(customersWithoutReports).order_by('-count')
     data = {
+        'notifications':notifications,
         'sub_menu':'Customers',
         'page_':'Customer List',
         'customers':customers
     }
     return render(request, 'front-end/enduser/enduser-list.html', data)
 
-
+@permission_required('account.view_user', login_url='login-user', raise_exception=True)
 def customerHistory(request, customerEmail):
+    notifications = Notification.objects.filter(is_opened=False, notif_for_id=request.user.id).order_by('-id')
     history = FaultReport.objects.filter(contact_email=customerEmail).order_by('-created_at')
     totalReports = FaultReport.objects.filter(contact_email=customerEmail).count()
     totalbill = Quotation.objects.filter(fault_report__contact_email=customerEmail, approval_status='QA').aggregate(total_bill=Sum('total_bill'))
@@ -125,6 +294,7 @@ def customerHistory(request, customerEmail):
     if isRegistered:
         user = User.objects.get(email=customerEmail)
     data={
+        'notifications':notifications,
         'sub_menu':'Customers',
         'page_':'Customer History',
         'customer':user,

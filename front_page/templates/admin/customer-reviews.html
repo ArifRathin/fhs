@@ -43,8 +43,6 @@
                     <th>Name</th>
                     <th>Review</th>
                     <th>Date</th>
-                    <th>Status</th>
-                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -56,25 +54,6 @@
                     </td>
                     <td>
                       {{ review.created_at|date:'d F, Y' }}
-                    </td>
-                    <td>
-                        {% if review.is_published == True %}
-                            <span class="badge bg-success">Published</span>
-                        {% else %}
-                            <span class="badge bg-danger">Unpublished</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if perms.front_page.change_customerreview %}
-                          <a class="btn btn-sm btn-primary" href="{% url 'update-review-status' reviewId=review.id %}">
-                            {% if review.is_published == True %}
-                              Unpublish
-                            {% else %}
-                              Publish
-                            {% endif %}
-                          </a>
-                        {% endif %}
-                      <!-- <a class="btn btn-sm btn-danger" href="">Delete</a> -->
                     </td>
                   </tr>
                   {% endfor %}

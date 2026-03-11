@@ -1,0 +1,327 @@
+{% extends 'base-front-end/admin/base.html' %}
+{% block title %}
+  <title>
+    {{ page_ }}
+  </title>
+{% endblock %}
+{% block css %}
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  {% endblock %}
+{% block content %}
+<!--begin::App Main-->
+<main class="app-main">
+  <!--begin::App Content Header-->
+  <div class="app-content-header">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-sm-6">
+          <h3 class="mb-0">{{ page_ }}</h3>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ page_ }}</li>
+          </ol>
+        </div>
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content Header-->
+  <!--begin::App Content-->
+  <div class="app-content">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row g-4">
+        <div class="col-12">
+          {% for message in messages %}
+            {% if message.extra_tags == 'success-edit-user' or message.extra_tags == 'success-create-location' or message.extra_tags == 'success-create-organization' %}
+              <div class="callout callout-success">
+                {{ message }}
+              </div>
+            {% elif message.extra_tags == 'error-edit-user' or message.extra_tags == 'error-create-location' or message.extra_tags == 'error-create-organization' %}
+              <div class="callout callout-danger">
+                {{ message }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <!--begin::Col-->
+        <!--end::Col-->
+        <!--begin::Col-->
+        <div class="col-md-6">
+          <!--begin::Quick Example-->
+          <div class="card card-primary card-outline mb-4">
+            <!--begin::Form-->
+            <form action="{% url 'edit-enduser' %}" method="POST">
+              {% csrf_token %}
+              <!--begin::Body-->
+              <div class="card-body">
+                <div class="mb-3">
+                  <input type="hidden" value="{{ customer.account_number }}" name="account-number">
+                  <label for="" class="form-label">First Name</label>
+                  <input type="text" name="first-name" value="{{ customer.first_name }}" class="form-control" id="" aria-describedby="firstName" />
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Last Name</label>
+                  <input type="text" name="last-name" value="{{ customer.last_name }}" class="form-control" id="" aria-describedby="lastName" />
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Email</label>
+                  <input required type="text" name="email" value="{{ customer.email }}" class="form-control" id="" aria-describedby="email" />
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Organization</label>
+                  <select class="form-control" name="organization-id" id="id-organization" onchange="getLocFromOrg()">
+                    <option value="" class="fst-italic">Not an organization</option>
+                    {% for organization in organizations %}
+                      <option value="{{ organization.id }}" {% if customer.organization_id == organization.id %}selected{% endif %}>{{ organization.name }}</option>
+                    {% endfor %}
+                    <option value="other" {% if customer.organization_name != None %}selected{% endif %}>Other</option>
+                  </select>
+                </div>
+                
+                  <div id="id-organization-name-div" class="mb-3 {% if customer.organization_name == None %}d-none{% endif %}">
+                    <label for="" class="form-label">Organization Name</label>
+                    <input id="id-organization-name" class="form-control" value="{{ customer.organization_name }}">
+                    <a data-bs-toggle="modal" data-bs-target="#organizationModal" class="text-muted" href="javascript:void(0)"><small>Add this organization</small></a>
+                  </div>
+                
+                <div class="mb-3">
+                  <label for="" class="form-label">Location</label>
+                  <select class="form-control user-location" name="location-id" id="id-location" required multiple>
+                    {% for location in customer.organization.location.all %}
+                      <option value="{{ location.id }}" {% if location in customer.user_location.all %}selected{% endif %}>{{ location.name }}</option>
+                    {% endfor %}
+                    <option value="other" {% if customer.location_name != None %}selected{% endif %}>Other</option>
+                  </select>
+                </div>
+                
+                  <div id="id-location-name-div" class="mb-3 {% if customer.location_name == None %}d-none{% endif %}">
+                    <label for="" class="form-label">Location Name</label>
+                    <input id="id-location-name" class="form-control" value="{{ customer.location_name }}">
+                    <a data-bs-toggle="modal" data-bs-target="#locationModal" class="text-muted" href="javascript:void(0)" onclick="insertLocationName()"><small>Add this location</small></a>
+                  </div>
+                
+                <div class="mb-3">
+                  <label for="" class="form-label">Phone</label>
+                  <input required type="text" name="phone" value="{{ customer.phone }}" class="form-control" id="" aria-describedby="phone" />
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Password</label>
+                  <input required type="password" name="password" class="form-control" id="" aria-describedby="password" />
+                </div>
+                <div class="mb-3">
+                  <label required for="" class="form-label">Retype Password</label>
+                  <input type="password" name="retype-password" class="form-control" id="" aria-describedby="retypePassword" />
+                </div>
+                <div class="mb-3">
+                  <input type="radio" name="is-active" value="1" {% if customer.is_active == True %}checked{% endif %} id=""/>
+                  <label required for="" class="form-label">Active</label>
+                  <input type="radio" name="is-active" value="0" {% if customer.is_active == False %}checked{% endif %} id=""/>
+                  <label required for="" class="form-label">Inactive</label>
+                </div>
+              </div>
+              <!--end::Body-->
+              <!--begin::Footer-->
+              <div class="card-footer">
+                <button type="submit" class="btn btn-primary">Update Customer</button>
+              </div>
+              <!--end::Footer-->
+            </form>
+            <!--end::Form-->
+          </div>
+          <!--end::Quick Example-->
+        </div>
+        <!--end::Col-->
+        <!--begin::Col-->
+        <div class="col-md-6">
+        </div>
+        <!--end::Col-->
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+<div class="modal fade" id="locationModal" tabindex="-1" aria-labelledby="locationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="locationModalLabel">Add Location</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form class="form-group" action="{% url 'create-location' %}" method="POST">
+        {% csrf_token %}
+      <div class="modal-body">
+          <div class="mb-3">
+                  <label for="" class="form-label">Location Name</label>
+                  <input type="text" name="location-name" class="form-control" id="id-location-name-modal" aria-describedby="locationName" />
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Address <small>(Optional)</small></label>
+                  <textarea name="address" class="form-control" id=""></textarea>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="is-active" id="active" value="1" checked/>
+                  <label class="form-check-label" for="active"> Active </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="is-active" id="inactive" value="0"/>
+                  <label class="form-check-label" for="inactive"> Inactive </label>
+                </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="organizationModal" tabindex="-1" aria-labelledby="organizationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="locationModalLabel">Add Organization</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form class="form-group" action="{% url 'create-organization' %}" method="POST">
+        {% csrf_token %}
+      <div class="modal-body">
+        <div class="mb-3">
+                  <label for="" class="form-label">Location</label>
+                  <select class="form-control location-class" name="location-id" id="" required multiple>
+                    {% for location in locations %}
+                      <option value="{{ location.id }}" {% if location in customer.user_location.all %}selected{% endif %}>{{ location.name }}</option>
+                    {% endfor %}
+                    <option value="other" {% if customer.location_name != None %}selected{% endif %}>Other</option>
+                  </select>
+                </div>
+                {% if customer.location_name != None %}
+        <div class="mb-3">
+                  <label for="" class="form-label">Location Name</label>
+                  <input type="text" name="location-name" value="{{ customer.location_name }}" class="form-control">
+                </div>
+                {% endif %}
+                <div class="mb-3">
+                  <label for="" class="form-label">Organization Name</label>
+                  <input name="organization-name" value="{{ customer.organization_name }}" class="form-control" id=""/>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="is-active" id="active" value="1" checked/>
+                  <label class="form-check-label" for="active"> Active </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="is-active" id="inactive" value="0"/>
+                  <label class="form-check-label" for="inactive"> Inactive </label>
+                </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+  </div>
+  <!--end::App Content-->
+</main>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script defer>
+const locationMap = new Map();
+{% for location in locations %}
+    locationMap.set({{ location.id }},'{{ location.name }}');
+{% endfor %}
+console.log(locationMap);
+async function getLocFromOrg(){
+    const orgElement = document.querySelector('#id-organization');
+    const organizationId = orgElement.value;
+    const locElement = document.querySelector('#id-location');
+    const organizationNameDiv = document.querySelector('#id-organization-name-div');
+    const organizationName = document.querySelector('#id-organization-name');
+
+    if(organizationId == 'other'){
+        organizationNameDiv.classList.remove('d-none');
+        organizationName.required = true;
+        var options = '';
+        locationMap.forEach((name, id)=>{
+            options += `<option value='${id}'>${name}</option>`;
+        });
+        options += `<option value='other'>Other</option>`;
+        locElement.innerHTML=options;
+    }
+    else if(organizationId == ''){
+        var options = '';
+        locationMap.forEach((name, id)=>{
+            options += `<option value='${id}'>${name}</option>`;
+        });
+        options += `<option value='other'>Other</option>`;
+        locElement.innerHTML=options;
+        organizationNameDiv.classList.add('d-none');
+        organizationName.required = false;
+    }
+    else{
+        organizationNameDiv.classList.add('d-none');
+        organizationName.required = false;
+        const url = `{% url 'get-loc-from-org' %}?organizationId=${organizationId}`;
+        try{
+            const response = await fetch(url);
+            if(!response.ok){
+                throw new Error('Error message '+error.message);
+            }
+            const locations = await response.json();
+            console.log(locations);
+            locElement.innerHTML='';
+            var options = '';
+            locations.forEach((loc)=>{
+                options += `<option value='${loc.id}'>${loc.name}</option>`;
+            });
+            options += `<option value='other'>Other</option>`;
+            locElement.innerHTML = options;
+        }
+        catch(error){
+            console.log(error.message);
+        }
+    }
+}
+function setLocationName(){
+    const locationElement = document.querySelector('#id-location');
+    const locationId = locationElement.value;
+    const locationNameDiv = document.querySelector('#id-location-name-div');
+    const locationName = document.querySelector('#id-location-name');
+    if(locationId == 'other'){
+        locationNameDiv.classList.remove('d-none');
+        locationName.required = true;
+    }
+    else{
+        locationNameDiv.classList.add('d-none');
+        locationName.required = false;
+    }
+}
+function insertLocationName(){
+  const locationNameId = document.querySelector('#id-location-name');
+  locationName = locationNameId.value;
+  const locationNameIdModal = document.querySelector('#id-location-name-modal');
+  locationNameIdModal.value = locationName;
+}
+// $(document).ready(function(){
+//     $('.location-class').select2();
+//   });
+$('#organizationModal').on('shown.bs.modal', function () {
+    $('.location-class').select2({
+        dropdownParent: $('#organizationModal'),
+        width: '100%' // This forces the correct width
+    });
+});
+$(document).ready(function(){
+  $('.user-location').select2();
+});
+</script>
+{% endblock %}

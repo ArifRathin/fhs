@@ -1,6 +1,8 @@
 {% extends 'base-front-end/admin/base.html' %}
 {% block title %}
-  <title>{{ page_ }}</title>
+  <title>
+    {{ page_ }}
+  </title>
 {% endblock %}
 {% block content %}
 <!--begin::App Main-->
@@ -17,7 +19,7 @@
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
             <li class="breadcrumb-item"><a href="#">Home</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ page_ }}</li>
+            <li class="breadcrumb-item active" aria-current="page">Create Customer</li>
           </ol>
         </div>
       </div>
@@ -32,27 +34,27 @@
     <div class="container-fluid">
       <!--begin::Row-->
       <div class="row g-4">
-        <!--begin::Col-->
         <div class="col-12">
           {% for message in messages %}
-            {% if message.extra_tags == 'success-create-technician' %}
+            {% if message.extra_tags == 'success-create-user' %}
               <div class="callout callout-success">
                 {{ message }}
               </div>
-            {% elif message.extra_tags == 'error-create-technician' %}
+            {% elif message.extra_tags == 'error-create-user' %}
               <div class="callout callout-danger">
                 {{ message }}
               </div>
             {% endif %}
           {% endfor %}
         </div>
+        <!--begin::Col-->
         <!--end::Col-->
         <!--begin::Col-->
         <div class="col-md-6">
           <!--begin::Quick Example-->
           <div class="card card-primary card-outline mb-4">
             <!--begin::Form-->
-            <form action="{% url 'create-technician' %}" method="POST">
+            <form action="{% url 'create-enduser' %}" method="POST">
               {% csrf_token %}
               <!--begin::Body-->
               <div class="card-body">
@@ -66,7 +68,24 @@
                 </div>
                 <div class="mb-3">
                   <label for="" class="form-label">Email</label>
-                  <input required type="text" name="email" class="form-control" id="" aria-describedby="email" />
+                  <input required type="text" name="email" value="{% if email != None %}{{ email }}{% endif %}" class="form-control" id="" aria-describedby="email" />
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Organization</label>
+                  <select class="form-control" name="organization-id" id="id-organization" onchange="getLocFromOrg()">
+                    <option value="" class="fst-italic">Not an organization</option>
+                    {% for organization in organizations %}
+                      <option value="{{ organization.id }}">{{ organization.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Location</label>
+                  <select class="form-control" name="location-id" id="id-location" onchange="setLocationName()">
+                    {% for location in locations %}
+                      <option value="{{ location.id }}">{{ location.name }}</option>
+                    {% endfor %}
+                  </select>
                 </div>
                 <div class="mb-3">
                   <label for="" class="form-label">Phone</label>
@@ -77,20 +96,14 @@
                   <input required type="password" name="password" class="form-control" id="" aria-describedby="password" />
                 </div>
                 <div class="mb-3">
-                  <label for="" class="form-label">Retype Password</label>
-                  <input required type="password" name="retype-password" class="form-control" id="" aria-describedby="retypePassword" />
-                </div>
-                <div class="mb-3">
-                  <input required type="radio" name="is-active" checked value="1" />
-                  <label for="" class="form-label">Active</label>
-                  <input required type="radio" name="is-active" value="0" />
-                  <label for="" class="form-label">Inactive</label>
+                  <label required for="" class="form-label">Retype Password</label>
+                  <input type="password" name="retype-password" class="form-control" id="" aria-describedby="retypePassword" />
                 </div>
               </div>
               <!--end::Body-->
               <!--begin::Footer-->
               <div class="card-footer">
-                <button type="submit" class="btn btn-primary">Create Technician</button>
+                <button type="submit" class="btn btn-primary">Create Customer</button>
               </div>
               <!--end::Footer-->
             </form>
@@ -110,4 +123,47 @@
   </div>
   <!--end::App Content-->
 </main>
+{% endblock %}
+{% block scripts %}
+<script>
+const locationMap = new Map();
+{% for location in locations %}
+    locationMap.set({{ location.id }},'{{ location.name }}');
+{% endfor %}
+console.log(locationMap);
+async function getLocFromOrg(){
+    const orgElement = document.querySelector('#id-organization');
+    const organizationId = orgElement.value;
+    const locElement = document.querySelector('#id-location');
+
+    if(organizationId == ''){
+        var options = '';
+        locationMap.forEach((name, id)=>{
+            options += `<option value='${id}'>${name}</option>`
+        });
+        locElement.innerHTML=options;
+    }
+    else{
+        const url = `{% url 'get-loc-from-org' %}?organizationId=${organizationId}`;
+        try{
+            const response = await fetch(url);
+            if(!response.ok){
+                throw new Error('Error message '+error.message);
+            }
+            const locations = await response.json();
+            console.log(locations);
+            locElement.innerHTML='';
+            var options = '';
+            locations.forEach((loc)=>{
+                options += `<option value='${loc.id}'>${loc.name}</option>`;
+            });
+            locElement.innerHTML = options;
+        }
+        catch(error){
+            console.log(error.message);
+        }
+    }
+    setLocationName();
+}
+</script>
 {% endblock %}

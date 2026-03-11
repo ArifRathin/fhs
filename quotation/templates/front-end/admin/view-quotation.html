@@ -31,7 +31,7 @@
     <div class="container-fluid">
       <!--begin::Row-->
       <div class="row">
-        <div class="col-12">
+        <div class="col-12 my-2">
           {% for message in messages %}
             {% if message.extra_tags == 'success-sent-quotation' or message.extra_tags == 'success-cancel-quotation' %}
               <div class="callout callout-success">
@@ -63,8 +63,8 @@
                   <div class="col-md-6 text-start">
                     <span class="h5">To</span><br>
                     <span>{{ quotation.fault_report.contact_name }}</span><br>
-                    <span>{{ quotation.fault_report.contact_email }}</span><br>
-                    <span>{{ quotation.fault_report.contact_phone }}</span><br>
+                    <span><i class="bi bi-envelope"></i>&nbsp;{{ quotation.fault_report.contact_email }}</span><br>
+                    <span><i class="bi bi-telephone"></i>&nbsp;{{ quotation.fault_report.contact_phone }}</span><br>
                   </div>
                   <div class="col-md-6 text-end">
                     <span class="h5">Job# {{ quotation.fault_report.job_number }}</span><br>
@@ -135,16 +135,16 @@
                   </div>
                   <div class="row mb-2">
                     <div class="col-md-12 text-end">
-                      <a class="btn btn-primary" href="{% url 'fault-report-details' jobNumber=quotation.fault_report.job_number %}">Show fault report</a>
+                      <a class="btn btn-sm btn-primary my-1" href="{% url 'fault-report-details' jobNumber=quotation.fault_report.job_number %}">Show fault report</a>
                       {% if quotation.approval_status != 'QC' %}
                         {% if quotation.is_sent == False and quotation.approval_status != 'QA' %}
-                          <a class="btn btn-primary" href="{% url 'send-quotation' quoteRefNum=quotation.quote_ref_num %}">Send to client</a>
+                          <a class="btn btn-sm btn-primary my-1" href="{% url 'send-quotation' quoteRefNum=quotation.quote_ref_num %}">Send to client</a>
                         {% endif %}
                         {% if quotation.fault_report.status != 'C' %}
-                          <a class="btn btn-danger" href="{% url 'cancel-quotation' quoteRefNum=quotation.quote_ref_num %}">Cancel</a>
+                          <a class="btn btn-sm btn-danger my-1" href="{% url 'cancel-quotation' quoteRefNum=quotation.quote_ref_num %}">Cancel</a>
                         {% endif %}
                       {% else %}
-                        <a class="btn btn-primary" href="{% url 'create-quotation' faultReportId=quotation.fault_report.id %}">Create new quotation</a>
+                        <a class="btn btn-sm btn-primary my-1" href="{% url 'create-quotation' faultReportId=quotation.fault_report.id %}">Create new quotation</a>
                       {% endif %}
                     </div>
                   </div>

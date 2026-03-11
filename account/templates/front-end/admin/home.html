@@ -1,4 +1,9 @@
 {% extends 'base-front-end/admin/base.html' %}
+{% block title %}
+    <title>
+        {{ page_ }}
+    </title>
+{% endblock %}
 {% block content %}
 <!--begin::App Main-->
 <main class="app-main">
@@ -9,25 +14,13 @@
             <!--begin::Row-->
             <div class="row">
                 <div class="col-sm-6">
-                    {% if request.user.is_admin %}
-                        <h3 class="mb-0">Admin Dashboard</h3>
-                    {% elif request.user.is_technician %}
-                        <h3 class="mb-0">Technician Dashboard</h3>
-                    {% elif request.user.is_enduser %}
-                        <h3 class="mb-0">User Dashboard</h3>
-                    {% endif %}
+                    {{ page_ }}
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-end">
                         <li class="breadcrumb-item"><a href="#">Home</a></li>
                         <li class="breadcrumb-item active" aria-current="page">
-                            {% if request.user.is_admin %}
-                                Admin Dashboard
-                            {% elif request.user.is_technician %}
-                                Technician Dashboard
-                            {% elif request.user.is_enduser %}
-                                User Dashboard
-                            {% endif %}
+                            {{ page_ }}
                         </li>
                     </ol>
                 </div>

@@ -9,11 +9,11 @@
             <div class="col-12">
                 {% for message in messages %}
                     {% if message.extra_tags == 'success-update-quotation' %}
-                        <div class="callout callout-success">
+                        <div class="alert bg-success text-white">
                             {{ message }}
                         </div>
                     {% elif message.extra_tags == 'error-update-quotation' %}
-                        <div class="callout callout-danger">
+                        <div class="alert bg-danger text-white">
                             {{ message }}
                         </div>
                     {% endif %}
@@ -21,7 +21,7 @@
             </div>
             <div class="col-md-6 text-start">
                 <h5>FHS Facilities</h5>
-                <span>31 Dinnath Sen Road, Gandaria, Dhaka-1204</span>
+                <span>21a Northgate Bradford, West Yorkshire BD1 3JR </span>
             </div>
             <div class="col-md-6 text-end">
                 <img class="img img-fluid" src="/media/{{ front_page.logo }}" alt="" style="width:50px;">
@@ -31,17 +31,13 @@
             <div class="col-md-6 text-start">
                 <span class="h5">To</span><br>
                 <span>{{ quotation.fault_report.contact_name }}</span><br>
-                <span>{{ quotation.fault_report.contact_email }}</span><br>
-                <span>{{ quotation.fault_report.contact_phone }}</span><br>
+                <span><i class="bi bi-envelope"></i>&nbsp;{{ quotation.fault_report.contact_email }}</span><br>
+                <span><i class="bi bi-telephone"></i>&nbsp;{{ quotation.fault_report.contact_phone }}</span><br>
             </div>
             <div class="col-md-6 text-end">
+                <span class="h5">Job# {{ quotation.fault_report.job_number }}</span><br>
                 <span class="h5">Ref# {{ quotation.quote_ref_num }}</span><br>
                 <span class="h6">{{ quotation.created_at|date:"d F, Y" }}</span><br>
-                {% if quotation.payment_status == 'U' %}
-                <span class="h5 fw-bold text-danger">UNPAID</span><br>
-                {% else %}
-                <span class="h5 fw-bold text-success">PAID</span><br>
-                {% endif %}
             </div>
             <div class="row">
                 <div class="col-md-12">
@@ -90,20 +86,20 @@
                 <div class="col-md-12">
                     Approval status:
                     {% if quotation.approval_status == 'QA' %}
-                    <span class="text-success">Approved</span>
+                    <span class="text-success fw-bold">Approved</span>
                     {% elif quotation.approval_status == 'QP' %}
-                    <span class="text-primary">Pending</span>
+                    <span class="text-primary fw-bold">Pending</span>
                     {% elif quotation.approval_status == 'QD' %}
-                    <span class="text-warning">Disapproved</span>
+                    <span class="text-warning fw-bold">Disapproved</span>
                     {% elif quotation.approval_status == 'QC' %}
-                    <span class="text-danger">Cancelled</span>
+                    <span class="text-danger fw-bold">Cancelled</span>
                     {% endif %}
                 </div>
             </div>
             <div class="row mb-2">
                 <div class="col-md-12 text-end">
                     {% if quotation.fault_report.status == 'QS' %}
-                        <a class="btn btn-primary" href="{% url 'update-client-approval-status' quoteRefNum=quotation.quote_ref_num approvalStatus='QA' %}">Approve</a>
+                        <a class="btn btn-sm btn-primary" href="{% url 'update-client-approval-status' quoteRefNum=quotation.quote_ref_num approvalStatus='QA' %}">Approve</a>
                         <!-- <a class="btn btn-primary" href="{% url 'update-client-approval-status' quoteRefNum=quotation.quote_ref_num approvalStatus='QD' %}">Disapprove</a> -->
                     {% endif %}
                 </div>

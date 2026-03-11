@@ -1,4 +1,4 @@
-from django.shortcuts import render, HttpResponse, redirect
+from django.shortcuts import render, redirect
 from django.db import transaction
 from .models import Quotation, Bill
 from django.utils import timezone
@@ -7,18 +7,18 @@ from notification.models import Notification
 from front_page.models import FrontPage
 import random
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 # Create your views here.
-@login_required(login_url='login-user')
+@permission_required('quotation.add_quotation', login_url='login-user', raise_exception=True)
 def createQuotation(request, faultReportId=0):
     if request.method == 'POST':
         faultReportId = request.POST.get('fault-report-id')
         now = timezone.now()
         formattedTime = now.strftime("%H%S%M%y%m%d")
         quoteRefNum = f'{faultReportId}{formattedTime}'
-        print(quoteRefNum)
+        # print(quoteRefNum)
         faultReportId = request.POST.get('fault-report-id')
         descriptions = request.POST.getlist('description')
         pricePerUnit = request.POST.getlist('price-per-unit')
@@ -58,7 +58,7 @@ def createQuotation(request, faultReportId=0):
     }
     return render(request, 'front-end/admin/create-quotation.html', data)
 
-@login_required(login_url='login-user')
+@permission_required('quotation.view_quotation', login_url='login-user', raise_exception=True)
 def viewQuotation(request, quoteRefNum):
     quotation = Quotation.objects.get(quote_ref_num=quoteRefNum)
     data = {
@@ -77,7 +77,7 @@ def viewClientQuotation(request, quoteEmailCode):
 
     return render(request, "front-end/view-quotation.html", data)
 
-@login_required(login_url='login-user')
+@permission_required('quotation.change_quotation', login_url='login-user', raise_exception=True)
 def sendQuotation(request, quoteRefNum):
     try:
         with transaction.atomic():
@@ -103,16 +103,16 @@ def sendQuotation(request, quoteRefNum):
             return redirect(request.META['HTTP_REFERER'])
         messages.error(request, 'Quotation could not be sent!', extra_tags='error-sent-quotation')
         return redirect(request.META['HTTP_REFERER'])
-    except:
-        messages.error(request, 'Something went wrong!', extra_tags='error-sent-quotation')
+    except Exception as e:
+        messages.error(request, str(e), extra_tags='error-sent-quotation')
     return redirect(request.META['HTTP_REFERER'])
     
 
-@login_required(login_url='login-user')
+@permission_required('quotation.change_quotation', login_url='login-user', raise_exception=True)
 def cancelQuotation(request, quoteRefNum):
     try:
         quotation = Quotation.objects.get(quote_ref_num=quoteRefNum)
-        quotation.approval_status = 'C'
+        quotation.approval_status = 'QC'
         quotation.save()
         messages.success(request, 'Quotation cancelled.', extra_tags='success-cancel-quotation')
     except:
@@ -151,7 +151,7 @@ def updateClientApprovalStatus(request, quoteRefNum, approvalStatus):
                             'text':notification.text,
                             'notif_for_id':notification.notif_for_id,
                             'notif_area':notification.notif_area,
-                            'fault_id':str(notification.fault_report.fault_id),
+                            # 'fault_id':str(notification.fault_report.fault_id),
                             'is_opened':notification.is_opened,
                             'quote_ref_num':notification.quotation.quote_ref_num,
                             'is_admin':1
