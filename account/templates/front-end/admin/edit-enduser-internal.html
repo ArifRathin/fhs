@@ -74,7 +74,7 @@
                   <label for="" class="form-label">Email</label>
                   <input required type="text" name="email" value="{{ customer.email }}" class="form-control" id="" aria-describedby="email" />
                 </div>
-                <div class="mb-3">
+                <!-- <div class="mb-3">
                   <label for="" class="form-label">Organization</label>
                   <select class="form-control" name="organization-id" id="id-organization" onchange="getLocFromOrg()">
                     <option value="" class="fst-italic">Not an organization</option>
@@ -83,15 +83,23 @@
                     {% endfor %}
                     <option value="other" {% if customer.organization_name != None %}selected{% endif %}>Other</option>
                   </select>
-                </div>
+                </div> -->
                 
-                  <div id="id-organization-name-div" class="mb-3 {% if customer.organization_name == None %}d-none{% endif %}">
+                  <div id="id-organization-name-div" class="mb-3">
                     <label for="" class="form-label">Organization Name</label>
-                    <input id="id-organization-name" class="form-control" value="{{ customer.organization_name }}">
-                    <a data-bs-toggle="modal" data-bs-target="#organizationModal" class="text-muted" href="javascript:void(0)"><small>Add this organization</small></a>
+                    <input id="id-organization-name" name="organization-name" class="form-control" value="{% if customer.organization_name != None %}{{ customer.organization_name }}{% endif %}">
+                    <!-- <a data-bs-toggle="modal" data-bs-target="#organizationModal" class="text-muted" href="javascript:void(0)"><small>Add this organization</small></a> -->
                   </div>
-                
-                <div class="mb-3">
+                  <div id="id-address-div" class="mb-3">
+                    <label for="" class="form-label">Address</label>
+                    <textarea required id="id-address" name="address" class="form-control">{{ customer.address }}</textarea>
+                  </div>
+                  <div id="id-postal-code-div" class="mb-3">
+                    <label for="" class="form-label">Postal Code</label>
+                    <input required id="id-postal-code" name="postal-code" class="form-control" value="{{ customer.post_code }}">
+                    <!-- <a data-bs-toggle="modal" data-bs-target="#organizationModal" class="text-muted" href="javascript:void(0)"><small>Add this organization</small></a> -->
+                  </div>
+                <!-- <div class="mb-3">
                   <label for="" class="form-label">Location</label>
                   <select class="form-control user-location" name="location-id" id="id-location" required multiple>
                     {% for location in customer.organization.location.all %}
@@ -105,7 +113,7 @@
                     <label for="" class="form-label">Location Name</label>
                     <input id="id-location-name" class="form-control" value="{{ customer.location_name }}">
                     <a data-bs-toggle="modal" data-bs-target="#locationModal" class="text-muted" href="javascript:void(0)" onclick="insertLocationName()"><small>Add this location</small></a>
-                  </div>
+                  </div> -->
                 
                 <div class="mb-3">
                   <label for="" class="form-label">Phone</label>
@@ -113,7 +121,7 @@
                 </div>
                 <div class="mb-3">
                   <label for="" class="form-label">Password</label>
-                  <input required type="password" name="password" class="form-control" id="" aria-describedby="password" />
+                  <input type="password" name="password" class="form-control" id="" aria-describedby="password" />
                 </div>
                 <div class="mb-3">
                   <label required for="" class="form-label">Retype Password</label>
@@ -235,93 +243,93 @@
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script defer>
-const locationMap = new Map();
-{% for location in locations %}
-    locationMap.set({{ location.id }},'{{ location.name }}');
-{% endfor %}
-console.log(locationMap);
-async function getLocFromOrg(){
-    const orgElement = document.querySelector('#id-organization');
-    const organizationId = orgElement.value;
-    const locElement = document.querySelector('#id-location');
-    const organizationNameDiv = document.querySelector('#id-organization-name-div');
-    const organizationName = document.querySelector('#id-organization-name');
+// const locationMap = new Map();
+// {% for location in locations %}
+//     locationMap.set({{ location.id }},'{{ location.name }}');
+// {% endfor %}
+// console.log(locationMap);
+// async function getLocFromOrg(){
+//     const orgElement = document.querySelector('#id-organization');
+//     const organizationId = orgElement.value;
+//     const locElement = document.querySelector('#id-location');
+//     const organizationNameDiv = document.querySelector('#id-organization-name-div');
+//     const organizationName = document.querySelector('#id-organization-name');
 
-    if(organizationId == 'other'){
-        organizationNameDiv.classList.remove('d-none');
-        organizationName.required = true;
-        var options = '';
-        locationMap.forEach((name, id)=>{
-            options += `<option value='${id}'>${name}</option>`;
-        });
-        options += `<option value='other'>Other</option>`;
-        locElement.innerHTML=options;
-    }
-    else if(organizationId == ''){
-        var options = '';
-        locationMap.forEach((name, id)=>{
-            options += `<option value='${id}'>${name}</option>`;
-        });
-        options += `<option value='other'>Other</option>`;
-        locElement.innerHTML=options;
-        organizationNameDiv.classList.add('d-none');
-        organizationName.required = false;
-    }
-    else{
-        organizationNameDiv.classList.add('d-none');
-        organizationName.required = false;
-        const url = `{% url 'get-loc-from-org' %}?organizationId=${organizationId}`;
-        try{
-            const response = await fetch(url);
-            if(!response.ok){
-                throw new Error('Error message '+error.message);
-            }
-            const locations = await response.json();
-            console.log(locations);
-            locElement.innerHTML='';
-            var options = '';
-            locations.forEach((loc)=>{
-                options += `<option value='${loc.id}'>${loc.name}</option>`;
-            });
-            options += `<option value='other'>Other</option>`;
-            locElement.innerHTML = options;
-        }
-        catch(error){
-            console.log(error.message);
-        }
-    }
-}
-function setLocationName(){
-    const locationElement = document.querySelector('#id-location');
-    const locationId = locationElement.value;
-    const locationNameDiv = document.querySelector('#id-location-name-div');
-    const locationName = document.querySelector('#id-location-name');
-    if(locationId == 'other'){
-        locationNameDiv.classList.remove('d-none');
-        locationName.required = true;
-    }
-    else{
-        locationNameDiv.classList.add('d-none');
-        locationName.required = false;
-    }
-}
-function insertLocationName(){
-  const locationNameId = document.querySelector('#id-location-name');
-  locationName = locationNameId.value;
-  const locationNameIdModal = document.querySelector('#id-location-name-modal');
-  locationNameIdModal.value = locationName;
-}
+//     if(organizationId == 'other'){
+//         organizationNameDiv.classList.remove('d-none');
+//         organizationName.required = true;
+//         var options = '';
+//         locationMap.forEach((name, id)=>{
+//             options += `<option value='${id}'>${name}</option>`;
+//         });
+//         options += `<option value='other'>Other</option>`;
+//         locElement.innerHTML=options;
+//     }
+//     else if(organizationId == ''){
+//         var options = '';
+//         locationMap.forEach((name, id)=>{
+//             options += `<option value='${id}'>${name}</option>`;
+//         });
+//         options += `<option value='other'>Other</option>`;
+//         locElement.innerHTML=options;
+//         organizationNameDiv.classList.add('d-none');
+//         organizationName.required = false;
+//     }
+//     else{
+//         organizationNameDiv.classList.add('d-none');
+//         organizationName.required = false;
+//         const url = `{% url 'get-loc-from-org' %}?organizationId=${organizationId}`;
+//         try{
+//             const response = await fetch(url);
+//             if(!response.ok){
+//                 throw new Error('Error message '+error.message);
+//             }
+//             const locations = await response.json();
+//             console.log(locations);
+//             locElement.innerHTML='';
+//             var options = '';
+//             locations.forEach((loc)=>{
+//                 options += `<option value='${loc.id}'>${loc.name}</option>`;
+//             });
+//             options += `<option value='other'>Other</option>`;
+//             locElement.innerHTML = options;
+//         }
+//         catch(error){
+//             console.log(error.message);
+//         }
+//     }
+// }
+// function setLocationName(){
+//     const locationElement = document.querySelector('#id-location');
+//     const locationId = locationElement.value;
+//     const locationNameDiv = document.querySelector('#id-location-name-div');
+//     const locationName = document.querySelector('#id-location-name');
+//     if(locationId == 'other'){
+//         locationNameDiv.classList.remove('d-none');
+//         locationName.required = true;
+//     }
+//     else{
+//         locationNameDiv.classList.add('d-none');
+//         locationName.required = false;
+//     }
+// }
+// function insertLocationName(){
+//   const locationNameId = document.querySelector('#id-location-name');
+//   locationName = locationNameId.value;
+//   const locationNameIdModal = document.querySelector('#id-location-name-modal');
+//   locationNameIdModal.value = locationName;
+// }
+// // $(document).ready(function(){
+// //     $('.location-class').select2();
+// //   });
+// $('#organizationModal').on('shown.bs.modal', function () {
+//     $('.location-class').select2({
+//         dropdownParent: $('#organizationModal'),
+//         width: '100%' // This forces the correct width
+//     });
+// });
 // $(document).ready(function(){
-//     $('.location-class').select2();
-//   });
-$('#organizationModal').on('shown.bs.modal', function () {
-    $('.location-class').select2({
-        dropdownParent: $('#organizationModal'),
-        width: '100%' // This forces the correct width
-    });
-});
-$(document).ready(function(){
-  $('.user-location').select2();
-});
+//   $('.user-location').select2();
+// });
 </script>
 {% endblock %}

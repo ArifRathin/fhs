@@ -52,8 +52,7 @@ def createFaultReport(request):
             return redirect(request.META['HTTP_REFERER'])
         preferredTime = request.POST.get('preferred-time').strip()
         if preferredTime == '':
-            messages.error(request, "Preferred time is mandatory!", extra_tags='error-create-report')
-            return redirect(request.META['HTTP_REFERER'])
+            preferredTime = None
         poNumber = request.POST.get('po-number').strip()
         ifRecall = request.POST.get('if-recall').strip()
         if ifRecall == '1':

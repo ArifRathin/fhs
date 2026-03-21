@@ -47,26 +47,15 @@ def createEndUser(request, email=None):
         if firstName == '' or lastName == '':
             messages.error(request, 'Both first name and last name are required.', extra_tags='error-create-user')
             return redirect(request.META['HTTP_REFERER'])
-        locationId = request.POST.get('location-id').strip()
-        if locationId == 'other':
-            locationName = request.POST.get('location-name').strip()
-            if len(locationName) == 0:
-                messages.error(request, 'Location name is invalid!', extra_tags='error-create-user')
-                redirect(request.META['HTTP_REFERER'])
-        elif Location.objects.filter(id=locationId).exists() == False:
-            messages.error(request, 'Location is required!', extra_tags='error-create-user')
-            redirect(request.META['HTTP_REFERER'])
-        organizationId = request.POST.get('organization-id').strip()
-        if organizationId == 'other':
-            organizationName = request.POST.get('organization-name').strip()
-            if len(organizationName) == 0:
-                messages.error(request, 'Organization name is invalid!', extra_tags='error-create-user')
-                redirect(request.META['HTTP_REFERER'])
-        elif organizationId != '' and Organization.objects.filter(id=organizationId).exists() == False:
-            messages.error(request, 'Organization input is invalid!', extra_tags='error-create-user')
-            redirect(request.META['HTTP_REFERER'])
-        elif organizationId == '':
-            organizationId = None
+        organizationName = request.POST.get('organization-name').strip()
+        address = request.POST.get('address').strip()
+        if address == '':
+            messages.error(request, 'Address is mandatory!', extra_tags='error-create-user')
+            return redirect(request.META['HTTP_REFERER'])
+        postalCode = request.POST.get('postal-code').strip()
+        if postalCode == '':
+            messages.error(request, 'Postal code is mandatory!', extra_tags='error-create-user')
+            return redirect(request.META['HTTP_REFERER'])
         try:
             with transaction.atomic():
                 user = User.objects.create_user(first_name=firstName, last_name=lastName, email=email, phone=phone, password=password)
@@ -89,14 +78,10 @@ def createEndUser(request, email=None):
                     accountNumber += '0'
                 accountNumber += str(user.id)
                 user.account_number = accountNumber
-                if organizationId == 'other':
+                if organizationName != '':
                     user.organization_name = organizationName
-                else:
-                    user.organization_id = organizationId
-                if locationId == 'other':
-                    user.location_name = locationName
-                else:
-                    user.user_location.set([locationId])
+                user.address = address
+                user.post_code = postalCode
                 user.save()
                 fault_reports = FaultReport.objects.filter(contact_email=user.email)
                 for report in fault_reports:
@@ -111,12 +96,8 @@ def createEndUser(request, email=None):
             messages.error(request, str(e), extra_tags='error-create-user')
             return redirect(request.META['HTTP_REFERER'])
     frontPage = FrontPage.objects.all().first()
-    organizations = Organization.objects.filter(is_active=True)
-    locations = Location.objects.filter(is_active=True)
     data = {
         'front_page':frontPage,
-        'organizations':organizations,
-        'locations':locations,
         'sub_menu':'Customers',
         'page_':'Create Customer',
         'email':email
@@ -159,26 +140,15 @@ def editEndUser(request, email=None):
         if lastName == '':
             messages.error(request, 'Last name is mandatory!', extra_tags='error-edit-user')
             return redirect(request.META['HTTP_REFERER'])
-        organizationId = request.POST.get('organization-id').strip()
-        if organizationId == 'other':
-            organizationName = request.POST.get('organization-name').strip()
-            if len(organizationName) == 0:
-                messages.error(request, 'Organization name is invalid!', extra_tags='error-edit-user')
-                redirect(request.META['HTTP_REFERER'])
-        elif organizationId != '' and Organization.objects.filter(id=organizationId).exists() == False:
-            messages.error(request, 'Organization input is invalid!', extra_tags='error-edit-user')
-            redirect(request.META['HTTP_REFERER'])
-        elif organizationId == '':
-            organizationId = None
-        locationId = request.POST.get('location-id').strip()
-        if locationId == 'other':
-            locationName = request.POST.get('location-name').strip()
-            if len(locationName) == 0:
-                messages.error(request, 'Location name is invalid!', extra_tags='error-edit-user')
-                redirect(request.META['HTTP_REFERER'])
-        elif Location.objects.filter(id=locationId).exists() == False:
-            messages.error(request, 'Location is required!', extra_tags='error-edit-user')
-            redirect(request.META['HTTP_REFERER'])
+        organizationName = request.POST.get('organization-name').strip()
+        address = request.POST.get('address').strip()
+        if address == '':
+            messages.error(request, 'Address is mandatory!', extra_tags='error-edit-user')
+            return redirect(request.META['HTTP_REFERER'])
+        postalCode = request.POST.get('postal-code').strip()
+        if postalCode == '':
+            messages.error(request, 'Postal code is mandatory!', extra_tags='error-edit-user')
+            return redirect(request.META['HTTP_REFERER'])
         isActive = request.POST.get('is-active').strip()
         if isActive == '0':
             isActive = False
@@ -202,12 +172,12 @@ def editEndUser(request, email=None):
         if customer == None:
             return redirect('create-enduser', email=email)
         notifications = Notification.objects.filter(is_opened=False, notif_for_id=request.user.id).order_by('-id')
-        organizations = Organization.objects.filter(is_active=True)
-        locations = Location.objects.filter(is_active=True)
+        # organizations = Organization.objects.filter(is_active=True)
+        # locations = Location.objects.filter(is_active=True)
         data = {
             'notifications':notifications,
-            'organizations':organizations,
-            'locations':locations,
+            # 'organizations':organizations,
+            # 'locations':locations,
             'email':email,
             'customer':customer,
             'sub_menu':'Customers',
@@ -221,11 +191,14 @@ def editEndUser(request, email=None):
             customer.phone = phone
             customer.first_name = firstName
             customer.last_name = lastName
-            customer.location_id = locationId
-            customer.organization_id = organizationId
-            customer.save()
+            if organizationName != '':
+                customer.organization_name = organizationName
+            customer.address = address
+            customer.post_code = postalCode
+            customer.is_active = isActive
             if password != '':
                 customer.set_password(password)
+            customer.save()
             messages.success(request, 'Successfully updated.', extra_tags='success-edit-user')
             return redirect('edit-enduser', email=email)
     except Exception as e:

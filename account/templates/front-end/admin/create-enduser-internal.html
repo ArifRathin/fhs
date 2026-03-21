@@ -71,6 +71,18 @@
                   <input required type="text" name="email" value="{% if email != None %}{{ email }}{% endif %}" class="form-control" id="" aria-describedby="email" />
                 </div>
                 <div class="mb-3">
+                  <label for="" class="form-label">Organization Name</label>
+                  <input type="text" name="organization-name" class="form-control" id="" aria-describedby="organization-name" />
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Address</label>
+                  <textarea required type="text" name="address" class="form-control" id="" aria-describedby="address"></textarea>
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label">Postal Code</label>
+                  <input required type="text" name="postal-code" class="form-control" id="" aria-describedby="postal-code" />
+                </div>
+                <!-- <div class="mb-3">
                   <label for="" class="form-label">Organization</label>
                   <select class="form-control" name="organization-id" id="id-organization" onchange="getLocFromOrg()">
                     <option value="" class="fst-italic">Not an organization</option>
@@ -86,7 +98,7 @@
                       <option value="{{ location.id }}">{{ location.name }}</option>
                     {% endfor %}
                   </select>
-                </div>
+                </div> -->
                 <div class="mb-3">
                   <label for="" class="form-label">Phone</label>
                   <input required type="text" name="phone" class="form-control" id="" aria-describedby="phone" />
@@ -125,45 +137,45 @@
 </main>
 {% endblock %}
 {% block scripts %}
-<script>
-const locationMap = new Map();
-{% for location in locations %}
-    locationMap.set({{ location.id }},'{{ location.name }}');
-{% endfor %}
-console.log(locationMap);
-async function getLocFromOrg(){
-    const orgElement = document.querySelector('#id-organization');
-    const organizationId = orgElement.value;
-    const locElement = document.querySelector('#id-location');
+<!-- <script> -->
+// const locationMap = new Map();
+// {% for location in locations %}
+//     locationMap.set({{ location.id }},'{{ location.name }}');
+// {% endfor %}
+// console.log(locationMap);
+// async function getLocFromOrg(){
+//     const orgElement = document.querySelector('#id-organization');
+//     const organizationId = orgElement.value;
+//     const locElement = document.querySelector('#id-location');
 
-    if(organizationId == ''){
-        var options = '';
-        locationMap.forEach((name, id)=>{
-            options += `<option value='${id}'>${name}</option>`
-        });
-        locElement.innerHTML=options;
-    }
-    else{
-        const url = `{% url 'get-loc-from-org' %}?organizationId=${organizationId}`;
-        try{
-            const response = await fetch(url);
-            if(!response.ok){
-                throw new Error('Error message '+error.message);
-            }
-            const locations = await response.json();
-            console.log(locations);
-            locElement.innerHTML='';
-            var options = '';
-            locations.forEach((loc)=>{
-                options += `<option value='${loc.id}'>${loc.name}</option>`;
-            });
-            locElement.innerHTML = options;
-        }
-        catch(error){
-            console.log(error.message);
-        }
-    }
-    setLocationName();
-}
-</script>
+//     if(organizationId == ''){
+//         var options = '';
+//         locationMap.forEach((name, id)=>{
+//             options += `<option value='${id}'>${name}</option>`
+//         });
+//         locElement.innerHTML=options;
+//     }
+//     else{
+//         const url = `{% url 'get-loc-from-org' %}?organizationId=${organizationId}`;
+//         try{
+//             const response = await fetch(url);
+//             if(!response.ok){
+//                 throw new Error('Error message '+error.message);
+//             }
+//             const locations = await response.json();
+//             console.log(locations);
+//             locElement.innerHTML='';
+//             var options = '';
+//             locations.forEach((loc)=>{
+//                 options += `<option value='${loc.id}'>${loc.name}</option>`;
+//             });
+//             locElement.innerHTML = options;
+//         }
+//         catch(error){
+//             console.log(error.message);
+//         }
+//     }
+//     setLocationName();
+// }
+<!-- </script> -->
 {% endblock %}

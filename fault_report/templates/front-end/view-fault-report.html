@@ -109,8 +109,14 @@
                     </span>
                 </div>
                 <div class="row mt-2">
-                    <p class="fw-bold mb-0">Estimated Time</p>
-                    <span>{{ fault_report.deadline }} {% if fault_report.deadline_time_unit == 'H' %}Hour{% if fault_report.deadline > 1 %}s{% endif %}{% elif fault_report.deadline_time_unit == 'D' %}Day{% if fault_report.deadline > 1 %}s{% endif %}{% endif %}</span>
+                    <div class="col-md-6">
+                        <p class="fw-bold mb-0">Estimated Time</p>
+                        <span>{{ fault_report.deadline }} {% if fault_report.deadline_time_unit == 'H' %}Hour{% if fault_report.deadline > 1 %}s{% endif %}{% elif fault_report.deadline_time_unit == 'D' %}Day{% if fault_report.deadline > 1 %}s{% endif %}{% endif %}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="fw-bold mb-0">Preferred Time</p>
+                        <span>{% if fault_report.preferred_time == None %}N/A{% else %}{{ fault_report.preferred_time|date:'d F, Y' }} at {{ fault_report.preferred_time|date:'P' }}{% endif %}</span>
+                    </div>
                 </div>
                 <div class="row mt-2">
                     <p class="fw-bold mb-0">Assigned To</p>
@@ -217,13 +223,19 @@
                 </div>
                 <div class="row mt-2">
                     <p class="fw-bold mb-0">Attached Images</p>
-                    {% for image in fault_report.faultreportimage_set.all %}
+                    {% if fault_report.faultreportimage_set.all %}
+                        {% for image in fault_report.faultreportimage_set.all %}
+                            <div class="col-md-2 my-2">
+                                <a target="_blank" href="/media/{{image.image}}">
+                                    <img class="img img-fluid" src="/media/{{image.image}}" alt="">
+                                </a>
+                            </div>
+                        {% endfor %}
+                    {% else %}
                         <div class="col-md-2 my-2">
-                            <a target="_blank" href="/media/{{image.image}}">
-                                <img class="img img-fluid" src="/media/{{image.image}}" alt="">
-                            </a>
+                            <span>N/A</span>
                         </div>
-                    {% endfor %}
+                    {% endif %}
                 </div>
               </div>
             </div>

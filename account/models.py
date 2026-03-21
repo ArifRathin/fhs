@@ -49,6 +49,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     organization_name = models.CharField(max_length=255, default=None, null=True)
     user_location = models.ManyToManyField(Location, related_name='user_location')
     location_name = models.TextField(default=None, null=True)
+    address = models.TextField(default=None, null=True)
+    post_code = models.CharField(max_length=12, default=None, null=True)
 
     account_activation_code = models.CharField(max_length=255, default=None, null=True)
     change_password_code = models.CharField(max_length=255, default=None, null=True)

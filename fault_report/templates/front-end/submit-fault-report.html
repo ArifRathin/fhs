@@ -40,7 +40,7 @@
                 <option value="">Others</option>
             </select>
             <label class="fw-bold" for="">Address</label>
-            <textarea class="form-control" required name="address" id=""></textarea>
+            <textarea class="form-control" required name="address" id="">{% if request.user.is_authenticated and request.user.is_enduser %}{{ request.user.address }}, {{ request.user.post_code }}{% endif %}</textarea>
             <label class="fw-bold" for="">Preferred Time</label>
             <input class="form-control" type="datetime-local" name="preferred-time">
             <label class="fw-bold" for="">Job type</label>
