@@ -11,20 +11,34 @@ def createTechnician(request):
         firstName = request.POST.get('first-name').strip()
         if firstName == '':
             firstName = 'Technician'
+        firstName = firstName.title()
         lastName = request.POST.get('last-name').strip()
         if lastName == '':
             lastName = 'Staff'
+        lastName = lastName.title()
         email = request.POST.get('email').strip()
         if email == '':
             messages.error(request, 'Email is required', extra_tags='error-create-technician')
+            return redirect(request.META['HTTP_REFERER'])
+        elif User.objects.filter(email=email).exists():
+            messages.error(request, 'Email already exists!', extra_tags='error-create-technician')
             return redirect(request.META['HTTP_REFERER'])
         phone = request.POST.get('phone').strip()
         if phone == '':
             messages.error(request, 'Phone is required', extra_tags='error-create-technician')
             return redirect(request.META['HTTP_REFERER'])
+        elif User.objects.filter(phone=phone).exists():
+            messages.error(request, 'Phone number already exists!', extra_tags='error-create-technician')
+            return redirect(request.META['HTTP_REFERER'])
+        elif len(phone) > 16:
+            messages.error(request, 'Phone number is too long.', extra_tags='error-create-technician')
+            return redirect(request.META['HTTP_REFERER'])
         password = request.POST.get('password').strip()
         if password == '':
             messages.error(request, 'Password is required', extra_tags='error-create-technician')
+            return redirect(request.META['HTTP_REFERER'])
+        elif len(password) < 6:
+            messages.error(request, 'Password has to be at least 6 characters.', extra_tags='error-create-technician')
             return redirect(request.META['HTTP_REFERER'])
         retypePassword = request.POST.get('retype-password').strip()
         if retypePassword == '':
