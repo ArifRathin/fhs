@@ -13,10 +13,24 @@ from .views_enduser import generateRandomStr
 @permission_required('account.add_user', login_url='login-user', raise_exception=True)
 def createAdmin(request, type='external'):
     if request.method == 'POST':
-        email = request.POST.get('email')
-        phone = request.POST.get('phone')
-        if User.objects.filter(email=email).exists():
+        email = request.POST.get('email').strip()
+        phone = request.POST.get('phone').strip()
+
+        if email == '':
+            messages.error(request, 'Email is required!', extra_tags='error-create-admin')
+            return redirect(request.META['HTTP_REFERER'])
+        elif User.objects.filter(email=email).exists():
             messages.error(request, 'Admin already exists', extra_tags='error-create-admin')
+            return redirect(request.META['HTTP_REFERER'])
+        
+        if phone == '':
+            messages.error(request, 'Phone is required!', extra_tags='error-create-admin')
+            return redirect(request.META['HTTP_REFERER'])
+        elif User.objects.filter(phone=phone).exists():
+            messages.error(request, 'Phone number already exists', extra_tags='error-create-admin')
+            return redirect(request.META['HTTP_REFERER'])
+        elif len(phone) > 16:
+            messages.error(request, 'Phone number is too long', extra_tags='error-create-admin')
             return redirect(request.META['HTTP_REFERER'])
         
         password = request.POST.get('password')
@@ -34,6 +48,9 @@ def createAdmin(request, type='external'):
             firstName = 'Admin'
         if lastName == '':
             lastName = 'Member'
+
+        firstName = firstName.title()
+        lastName = lastName.title()
 
         isSuperadmin = False
         isActive = True

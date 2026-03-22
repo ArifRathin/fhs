@@ -246,7 +246,9 @@
                 {% endif %}
                 {% for quote in fault_report.quotes.all %}
                     {% if quote.approval_status != 'QC' and request.user.is_technician == False %}
-                        <a href="{% url 'view-quotation' quoteRefNum=quote.quote_ref_num %}" class="btn btn-primary">View Quotation</a>
+                        {% if quote.email_code != None or request.user.is_admin == True and perms.quotation.view_quotation %}
+                            <a href="{% url 'view-quotation' quoteRefNum=quote.quote_ref_num %}" class="btn btn-primary">View Quotation</a>
+                        {% endif %}
                     {% endif %}
                 {% endfor %}
             </div>

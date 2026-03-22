@@ -58,7 +58,7 @@ def createQuotation(request, faultReportId=0):
     }
     return render(request, 'front-end/admin/create-quotation.html', data)
 
-@permission_required('quotation.view_quotation', login_url='login-user', raise_exception=True)
+@login_required(login_url='login-user')
 def viewQuotation(request, quoteRefNum):
     quotation = Quotation.objects.get(quote_ref_num=quoteRefNum)
     data = {

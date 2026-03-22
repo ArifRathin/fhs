@@ -30,8 +30,11 @@ def createEndUser(request, email=None):
         if User.objects.filter(phone=phone).exists():
             messages.error(request, 'Phone number already exists!', extra_tags='error-create-user')
             return redirect(request.META['HTTP_REFERER'])
+        elif len(phone) > 16:
+            messages.error(request, 'Phone number is too long!', extra_tags='error-create-user')
+            return redirect(request.META['HTTP_REFERER'])
         elif phone == '':
-            messages.error(request, 'Email is required!', extra_tags='error-create-user')
+            messages.error(request, 'Phone number is required!', extra_tags='error-create-user')
             return redirect(request.META['HTTP_REFERER'])
         password = request.POST.get('password')
         if len(password) < 6:
@@ -47,14 +50,21 @@ def createEndUser(request, email=None):
         if firstName == '' or lastName == '':
             messages.error(request, 'Both first name and last name are required.', extra_tags='error-create-user')
             return redirect(request.META['HTTP_REFERER'])
+        firstName = firstName.title()
+        lastName = lastName.title()
         organizationName = request.POST.get('organization-name').strip()
+        organizationName = organizationName.title()
         address = request.POST.get('address').strip()
+        address = address.capitalize()
         if address == '':
             messages.error(request, 'Address is mandatory!', extra_tags='error-create-user')
             return redirect(request.META['HTTP_REFERER'])
         postalCode = request.POST.get('postal-code').strip()
         if postalCode == '':
             messages.error(request, 'Postal code is mandatory!', extra_tags='error-create-user')
+            return redirect(request.META['HTTP_REFERER'])
+        elif len(postalCode) > 12:
+            messages.error(request, 'Postal code is too long!', extra_tags='error-create-user')
             return redirect(request.META['HTTP_REFERER'])
         try:
             with transaction.atomic():

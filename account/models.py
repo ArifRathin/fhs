@@ -81,7 +81,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return True
     
 
-@receiver(post_save, sender=User)
+# @receiver(post_save, sender=User)
 def sendEmailToUser(sender, instance, created, **kwargs):
     if instance.is_enduser==True and instance.is_active == False and instance.account_activation_code != None:
         to = []
