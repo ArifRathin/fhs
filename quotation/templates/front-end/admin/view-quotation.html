@@ -65,10 +65,14 @@
                     <span>{{ quotation.fault_report.contact_name }}</span><br>
                     <span><i class="bi bi-envelope"></i>&nbsp;{{ quotation.fault_report.contact_email }}</span><br>
                     <span><i class="bi bi-telephone"></i>&nbsp;{{ quotation.fault_report.contact_phone }}</span><br>
+                    <span><i class="bi bi-geo-alt"></i>&nbsp;{{ quotation.fault_report.address }}, {{ quotation.fault_report.location.name }}</span><br>
                   </div>
                   <div class="col-md-6 text-end">
                     <span class="h5">Job# {{ quotation.fault_report.job_number }}</span><br>
-                    <span class="h5">Ref# {{ quotation.quote_ref_num }}</span><br>
+                    <!-- <span class="h5">Ref# {{ quotation.quote_ref_num }}</span><br> -->
+                    {% if quotation.fault_report.po_number %}
+                      <span class="h5">PO# {{ quotation.fault_report.po_number }}</span><br>
+                    {% endif %}
                     <span class="h6">{{ quotation.created_at|date:"d F, Y" }}</span><br>
                     <!-- {% if quotation.payment_status == 'U' %}
                       <span class="h5 fw-bold text-danger">UNPAID</span><br>
