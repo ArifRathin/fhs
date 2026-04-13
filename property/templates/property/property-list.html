@@ -1,0 +1,128 @@
+{% extends 'base-front-end/admin/base.html' %}
+{% block title %}
+  <title>{{ page_ }}</title>
+{% endblock %}
+{% block content %}
+<!--begin::App Main-->
+<main class="app-main">
+  <!--begin::App Content Header-->
+  <div class="app-content-header">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-sm-6">
+          <h3 class="mb-0">{{ page_ }}</h3>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ page_ }}</li>
+          </ol>
+        </div>
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content Header-->
+  <!--begin::App Content-->
+  <div class="app-content">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-12 my-2">
+          {% for message in messages %}
+            {% if message.extra_tags == 'success-delete-property' %}
+              <div class="callout callout-success">
+                {{ message }}
+              </div>
+            {% elif message.extra_tags == 'error-delete-property' %}
+              <div class="callout callout-danger">
+                {{ message }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <div class="col-md-12">
+          <!-- /.card -->
+          <div class="card mb-4">
+            <!-- /.card-header -->
+            <div class="card-body">
+              <table id="id-property-list" class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Items</th>
+                    <th>Visits</th>
+                    <th>Notes</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for property in properties %}
+                  <tr class="align-middle">
+                    <td>{{ property.name }}</td>
+                    <td>
+                      {{ property.address }}
+                    </td>
+                    <td>
+                      <a class="text-muted" href="{% url 'item-list' propertyId=property.id category=0 condition='ALL' %}">{{ property.items.count }}</a>
+                    </td>
+                    <td>
+                        {{ property.visits.count }}
+                    </td>
+                    <td>
+                      {% if property.notes %}
+                        {{ property.notes }}
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if perms.property.change_property %}
+                        <a class="text-primary" href="{% url 'edit-property' propertyId=property.id %}"><i class="bi bi-pencil"></i></a>
+                      {% endif %}
+                      {% if perms.property.delete_property %}
+                        <a data-bs-toggle="modal" data-bs-target="#deleteModal" class="text-danger" href="" onclick="deleteRecord('this job', `{% url 'delete-property' propertyId=property.id %}`)"><i class="bi bi-trash"></i></a>
+                      {% endif %}
+                      {% if perms.property.add_item %}
+                        <a title="Add Item" class="text-primary" href="{% url 'create-item' propertyId=property.id %}"><i class="bi bi-plus"></i></a>
+                      {% endif %}
+                      <!-- <a class="btn btn-sm btn-danger" href="">Delete</a> -->
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <!-- /.card-body -->
+          </div>
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
+        <!-- /.col -->
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+    {% include 'base-front-end/modals/delete-modal.html' %} 
+  </div>
+  <!--end::App Content-->
+</main>
+<!--end::App Main-->
+{% endblock %}
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script> -->
+<script src="https://cdn.datatables.net/2.3.5/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.3.5/js/dataTables.bootstrap5.js"></script>
+<script type="text/javascript">
+  // new DataTable('#id-fault-report');
+  $(document).ready(function() {
+        $('#id-property-list').DataTable({
+            ordering:false,
+            "lengthChange": false
+    })});
+</script>
+{% endblock %}

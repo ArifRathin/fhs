@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     'notification',
     'front_page',
     'channels',
-    'address'
+    'address',
+    'property'
 ]
 
 MIDDLEWARE = [

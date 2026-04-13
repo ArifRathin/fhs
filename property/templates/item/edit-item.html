@@ -1,0 +1,135 @@
+{% extends 'base-front-end/admin/base.html' %}
+{% block title %}
+  <title>{{ page_ }}</title>
+{% endblock %}
+{% block content %}
+<!--begin::App Main-->
+<main class="app-main">
+  <!--begin::App Content Header-->
+  <div class="app-content-header">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-sm-6">
+          <h3 class="mb-0">{{ page_ }}</h3>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ page_ }}</li>
+          </ol>
+        </div>
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content Header-->
+  <!--begin::App Content-->
+  <div class="app-content">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row g-4">
+        <!--begin::Col-->
+        <div class="col-12">
+          {% for message in messages %}
+            {% if message.extra_tags == 'success-edit-item' %}
+              <div class="callout callout-success">
+                {{ message }}
+              </div>
+            {% elif message.extra_tags == 'error-edit-item' %}
+              <div class="callout callout-danger">
+                {{ message }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <!--end::Col-->
+        <!--begin::Col-->
+        <div class="col-md-6">
+          <!--begin::Quick Example-->
+          <div class="card card-primary card-outline mb-4">
+            <!--begin::Form-->
+            <form action="{% url 'edit-item' %}" method="POST" enctype="multipart/form-data">
+              {% csrf_token %}
+              <!--begin::Body-->
+              <div class="card-body">
+                <div class="mb-3">
+                  <input type="hidden" name="item-id" value="{{item.id}}">
+                  <label for="" class="form-label">Item Name</label>
+                  <input type="text" name="name" value="{{ item.name }}" class="form-control" id=""/>
+                </div>
+                <div class="mb-3">
+                  <label for="exampleInputPassword1" class="form-label">Category</label>
+                  <select class="form-control" name="category" id="">
+                    {% for category in categories %}
+                      <option value="{{ category.id }}" {% if item.category.id == category.id %}selected{% endif %}>{{ category.title }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="exampleInputPassword1" class="form-label">Description<small>(Optional)</small></label>
+                  <textarea name="description" class="form-control" id="">{% if item != None  %}{{ item.notes }}{% endif %}</textarea>
+                </div>
+                <div class="mb-3">
+                  <label for="exampleInputPassword1" class="form-label">Condition</label>
+                  <select name="condition" class="form-control" id="">
+                    {% for value, label in conditions %}
+                      <option value="{{ value }}" {% if item.condition == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="exampleInputPassword1" class="form-label">Date Recorded</label>
+                  <input class="form-control" type="datetime-local" name="date-recorded" value="{{ item.date_recorded|date:'Y-m-d\TH:i' }}">
+                </div>
+                <div class="mb-3">
+                  <div class="container">
+                    <div class="row">
+                      {% for photo in item.photos.all %}
+                        <div id="id-photo-div-{{photo.id}}" class="mt-1 col-md-4">
+                          <button type="button" class="btn btn-sm btn-outline-danger form-control mb-1" onclick="removeImage(`{{ photo.id }}`)"><i class="bi bi-trash"></i></button>
+                          <img class="img img-fluid" src="/media/{{photo.image}}" alt="">
+                          <input type="hidden" name="existing-images" value="{{ photo.image }}">
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  <label for="exampleInputPassword1" class="form-label">Photo (Upload multiple if necessary)</label>
+                  <input type="file" multiple name="photos" class="form-control" id="">
+                </div>
+              </div>
+              <!--end::Body-->
+              <!--begin::Footer-->
+              <div class="card-footer">
+                <button type="submit" class="btn btn-primary">Save</button>
+              </div>
+              <!--end::Footer-->
+            </form>
+            <!--end::Form-->
+          </div>
+          <!--end::Quick Example-->
+        </div>
+        <!--end::Col-->
+        <!--begin::Col-->
+        <div class="col-md-6">
+        </div>
+        <!--end::Col-->
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content-->
+</main>
+{% endblock %}
+{% block scripts %}
+<script>
+  function removeImage(imgId){
+    imageDiv = document.getElementById('id-photo-div-'+imgId);
+    imageDiv.remove();
+  }
+</script>
+{% endblock %}

@@ -527,6 +527,35 @@
                   {% endif %}
               </ul>
             </li>
+            {% if request.user.is_admin or request.user.is_technician %}
+            <li class="nav-item {% if sub_menu == 'Property' %}menu-open{% endif %}">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-house"></i>
+                <p>
+                  Properties
+                  <i class="nav-arrow bi bi-chevron-right"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                  {% if perms.property.add_property %}
+                    <li class="nav-item">
+                      <a href="{% url 'create-property' %}" class="nav-link">
+                        <i class="nav-icon bi bi-circle{% if page_ == 'Create Property' %}-fill{% endif %}"></i>
+                        <p>Create Property</p>
+                      </a>
+                    </li>
+                  {% endif %}
+                  {% if perms.property.view_property %}
+                    <li class="nav-item">
+                      <a href="{% url 'property-list' %}" class="nav-link">
+                        <i class="nav-icon bi bi-circle{% if page_ == 'Property List' %}-fill{% endif %}"></i>
+                        <p>Property List</p>
+                      </a>
+                    </li>
+                  {% endif %}
+              </ul>
+            </li>
+            {% endif %}
             {% endif %}
           </ul>
           <!--end::Sidebar Menu-->

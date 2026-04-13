@@ -1,0 +1,159 @@
+{% extends 'base-front-end/admin/base.html' %}
+{% block title %}
+  <title>{{ page_ }}</title>
+{% endblock %}
+{% block content %}
+<!--begin::App Main-->
+<main class="app-main">
+  <!--begin::App Content Header-->
+  <div class="app-content-header">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-sm-6">
+          <h3 class="mb-0">{{ page_ }}</h3>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ page_ }}</li>
+          </ol>
+        </div>
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content Header-->
+  <!--begin::App Content-->
+  <div class="app-content">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-12 my-2">
+          {% for message in messages %}
+            {% if message.extra_tags == 'success-delete-item'  %}
+              <div class="callout callout-success">
+                {{ message }}
+              </div>
+            {% elif message.extra_tags == 'error-delete-item' or message.extra_tags == 'error-filter-item' %}
+              <div class="callout callout-danger">
+                {{ message }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <div class="col-md-12">
+          <!-- /.card -->
+          <div class="card mb-4">
+            <!-- /.card-header -->
+            <div class="card-body p-1">
+              <span class="text-muted">Filter by</span>
+
+              <a class="btn btn-sm btn-dark dropdown-toggle mt-1 ms-2" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ condition_name }}
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li><a class="dropdown-item {% if condition == 'ALL' %}active{% endif %}" href="{% url 'item-list' propertyId=property_id category=category condition='ALL' %}">All Conditions</a></li>
+                {% for value, label in conditions %}
+                  <li><a class="dropdown-item {% if condition == value %}active{% endif %}" href="{% url 'item-list' propertyId=property_id category=category condition=value %}">{{ label }}</a></li>
+                {% endfor %}
+              </ul>
+
+              <a class="btn btn-sm btn-dark dropdown-toggle mt-1 ms-2" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ category_name }}
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li><a class="dropdown-item {% if category == 0 %}active{% endif %}" href="{% url 'item-list' propertyId=property_id category=0 condition=condition %}">All Conditions</a></li>
+                {% for cat in categories %}
+                  <li><a class="dropdown-item {% if cat.id == category %}active{% endif %}" href="{% url 'item-list' propertyId=property_id category=cat.id condition=condition %}">{{ cat.title }}</a></li>
+                {% endfor %}
+              </ul>
+
+              <table id="id-item-list" class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Photo</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Condition</th>
+                    <th>Date Recorded</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in items %}
+                  <tr class="align-middle">
+                    <td>
+                      {% for photo in item.photos.all %}
+                        {% if forloop.first %}
+                          <img class="img img-fluid" style="height: 60px;" src="/media/{{ photo.image }}" alt="">
+                        {% endif %}
+                      {% endfor %}
+                    </td>
+                    <td>{{ item.name }}</td>
+                    <td>
+                      {% if item.category_id != None %}
+                        {{ item.category.title }}
+                      {% endif %}
+                    </td>
+                    <td>
+                      {{ item.notes }}
+                    </td>
+                    <td>
+                        {% for value, label in conditions %}
+                          {% if value == item.condition %}
+                            {{ label }}
+                          {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                      {{ item.date_recorded }}
+                    </td>
+                    <td>
+                      {% if perms.property.change_item %}
+                        <a class="text-primary" href="{% url 'edit-item' itemId=item.id %}"><i class="bi bi-pencil"></i></a>
+                      {% endif %}
+                      {% if perms.property.delete_item %}
+                        <a data-bs-toggle="modal" data-bs-target="#deleteModal" class="text-danger" href="" onclick="deleteRecord('this item?', `{% url 'delete-item' itemId=item.id %}`)"><i class="bi bi-trash"></i></a>
+                      {% endif %}
+                      <!-- <a class="btn btn-sm btn-danger" href="">Delete</a> -->
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <!-- /.card-body -->
+          </div>
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
+        <!-- /.col -->
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+    {% include 'base-front-end/modals/delete-modal.html' %} 
+  </div>
+  <!--end::App Content-->
+</main>
+<!--end::App Main-->
+{% endblock %}
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script> -->
+<script src="https://cdn.datatables.net/2.3.5/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.3.5/js/dataTables.bootstrap5.js"></script>
+<script type="text/javascript">
+  // new DataTable('#id-fault-report');
+  $(document).ready(function() {
+        $('#id-item-list').DataTable({
+            ordering:false,
+            "lengthChange": false
+    })});
+</script>
+{% endblock %}

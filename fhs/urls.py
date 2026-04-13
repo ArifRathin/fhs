@@ -31,7 +31,8 @@ urlpatterns = [
     # path('user-management-area/', include('status.urls')),
     path('user-management-area/', include('quotation.urls')),
     path('front-area/', include('fault_report.urls')),
-    path('front-page/', include('front_page.urls'))
+    path('front-page/', include('front_page.urls')),
+    path('property/', include('property.urls'))
 ]
 
 if settings.DEBUG:

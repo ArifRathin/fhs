@@ -1,0 +1,117 @@
+{% extends 'base-front-end/admin/base.html' %}
+{% block title %}
+  <title>{{ page_ }}</title>
+{% endblock %}
+{% block content %}
+<!--begin::App Main-->
+<main class="app-main">
+  <!--begin::App Content Header-->
+  <div class="app-content-header">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-sm-6">
+          <h3 class="mb-0">{{ page_ }}</h3>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ page_ }}</li>
+          </ol>
+        </div>
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content Header-->
+  <!--begin::App Content-->
+  <div class="app-content">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row g-4">
+        <!--begin::Col-->
+        <div class="col-12">
+          {% for message in messages %}
+            {% if message.extra_tags == 'success-edit-property' %}
+              <div class="callout callout-success">
+                {{ message }}
+              </div>
+            {% elif message.extra_tags == 'error-edit-property' %}
+              <div class="callout callout-danger">
+                {{ message }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <!--end::Col-->
+        <!--begin::Col-->
+        <div class="col-md-6">
+          <!--begin::Quick Example-->
+          <div class="card card-primary card-outline mb-4">
+            <!--begin::Form-->
+            <form action="{% url 'edit-property' %}" method="POST">
+              {% csrf_token %}
+              <!--begin::Body-->
+              <div class="card-body">
+                <div class="mb-3">
+                  <label for="" class="form-label">Property Name</label>
+                  <input type="hidden" name="property-id" value="{{ property.id }}">
+                  <input type="text" name="name" value="{{ property.name }}" class="form-control" id="" aria-describedby="jobTitle" />
+                </div>
+                <div class="mb-3">
+                  <label for="exampleInputPassword1" class="form-label">Address</label>
+                  <textarea name="address" class="form-control" id="">{{ property.address }}</textarea>
+                </div>
+                <div class="mb-3">
+                  <label for="exampleInputPassword1" class="form-label">Notes<small>(Optional)</small></label>
+                  <textarea name="notes" class="form-control" id="">{{ property.notes }}</textarea>
+                </div>
+                {% if property.visits.count > 0 %}
+                  <div class="mb-3">
+                    <label for="exampleInputPassword1" class="form-label">Visiting Date</label>
+                    <div id="id-visiting-date-div">
+                        {% for visit in property.visits.all %}
+                          <input name="visiting-dates" class="form-control mt-1" value="{{ visit.visiting_date|date:'Y-m-d\TH:i' }}" type="datetime-local">
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-primary mt-1" onclick="addNewDate()">Add More</button>
+                  </div>
+                {% endif %}
+              </div>
+              <!--end::Body-->
+              <!--begin::Footer-->
+              <div class="card-footer">
+                <button type="submit" class="btn btn-primary">Save</button>
+              </div>
+              <!--end::Footer-->
+            </form>
+            <!--end::Form-->
+          </div>
+          <!--end::Quick Example-->
+        </div>
+        <!--end::Col-->
+        <!--begin::Col-->
+        <div class="col-md-6">
+        </div>
+        <!--end::Col-->
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content-->
+</main>
+{% endblock %}
+{% block scripts %}
+<script>
+  function addNewDate(){
+    const visitingDatesDiv = document.getElementById('id-visiting-date-div');
+    const newDateField = `<input name="visiting-dates" class="form-control mt-1" type="datetime-local">`;
+
+    visitingDatesDiv.insertAdjacentHTML('beforeend', newDateField);
+  }
+</script>
+{% endblock %}
