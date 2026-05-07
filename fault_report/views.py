@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required, permission_required
 from account.models import User
 from .models import ReportStatus, PriorityLevel, TimeUnit, FaultReport, FaultReportImage, CompletionImage
@@ -646,9 +647,12 @@ def completeTask(request, jobNumber):
     return redirect(request.META['HTTP_REFERER'])
     
 
-@permission_required('fault_report.view_faultreport', login_url='login-user', raise_exception=True)
+@login_required(login_url='login-user')
 def faultReportDetails(request, jobNumber):
     faultReport = FaultReport.objects.get(job_number=jobNumber)
+    isUserTechnician = faultReport.user_technician.filter(id=request.user.id).exists()
+    if request.user.has_perm('app.fault_report.view_faultreport') == False and isUserTechnician == False:
+        return HttpResponse('Permission denied.')
     deadline = faultReport.deadline
     deadline_time_unit = faultReport.deadline_time_unit
     daysTaken = None
