@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     'front_page',
     'channels',
     'address',
-    'property'
+    'property',
+    'contractor'
 ]
 
 MIDDLEWARE = [

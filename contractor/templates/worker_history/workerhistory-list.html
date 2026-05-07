@@ -1,0 +1,116 @@
+{% extends 'base-front-end/admin/base.html' %}
+{% block title %}
+  <title>{{ page_ }}</title>
+{% endblock %}
+{% block content %}
+<!--begin::App Main-->
+<main class="app-main">
+  <!--begin::App Content Header-->
+  <div class="app-content-header">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-sm-6">
+          <h3 class="mb-0">{{ page_ }}</h3>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ page_ }}</li>
+          </ol>
+        </div>
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content Header-->
+  <!--begin::App Content-->
+  <div class="app-content">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-12 my-3">
+          {% for message in messages %}
+            {% if message.extra_tags == 'success-workerhistory-list' %}
+              <div class="callout callout-success">
+                {{ message }}
+              </div>
+            {% elif message.extra_tags == 'error-workerhistory-list' %}
+              <div class="callout callout-danger">
+                {{ message }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <div class="col-md-12">
+          <!-- /.card -->
+          <div class="card mb-4">
+            <!-- /.card-header -->
+            <div class="card-body p-0">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Job Number</th>
+                    <th>Purchase Order</th>
+                    <th>Ref</th>
+                    <th>Charge</th>
+                    <th>Date Completed</th>
+                    <th>Signed By</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for history in history_list %}
+                  <tr class="align-middle">
+                    <td>{{ history.job_number }}</td>
+                    <td>{{ history.po_number }}</td>
+                    <td>{{ history.ref }}</td>
+                    <td>{{ history.charge }}</td>
+                    <td>{{ history.date_completed }}</td>
+                    <td>{{ history.signed_by }}</td>
+                    <td>
+                        {% if perms.contractor.change_workerhistory %}
+                            <a class="text-primary" href="{% url 'edit-workerhistory' historyId=history.id %}"><i class="bi bi-pencil"></i></a>
+                        {% endif %}
+                        {% if perms.contractor.delete_workerhistory %}
+                            <a data-bs-toggle="modal" data-bs-target="#deleteModal" class="text-danger" href="" onclick="deleteRecord('this worker history?', `{% url 'delete-workerhistory' historyId=history.id %}`)"><i class="bi bi-trash"></i></a>
+                        {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+              
+            <!-- /.card-body -->
+          </div>
+          
+          
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
+         <div class="col-md-12 text-center">
+            {% if history_list.has_previous %}
+              <a class="btn btn-sm btn-secondary" href="?page=1">&laquo; First</a>
+              <a class="btn btn-sm btn-secondary" href="?page={{ history_list.previous_page_number }}">Previous</a>
+            {% endif %}
+            <a class="btn btn-sm btn-secondary" href="?page={{ history_list.number }}">Page {{ history_list.number }} of {{ history_list.paginator.num_pages }}</a>
+            {% if history_list.has_next %}
+              <a class="btn btn-sm btn-secondary" href="?page={{ history_list.next_page_number }}">Next</a>
+              <a class="btn btn-sm btn-secondary" href="?page={{ history_list.paginator.num_pages }}">Last &raquo;</a>
+            {% endif %}
+          </div>
+        <!-- /.col -->
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+    {% include 'base-front-end/modals/delete-modal.html' %} 
+  </div>
+  <!--end::App Content-->
+</main>
+<!--end::App Main-->
+{% endblock %}

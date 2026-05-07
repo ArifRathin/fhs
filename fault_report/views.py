@@ -646,6 +646,7 @@ def completeTask(request, jobNumber):
     return redirect(request.META['HTTP_REFERER'])
     
 
+@permission_required('fault_report.view_faultreport', login_url='login-user', raise_exception=True)
 def faultReportDetails(request, jobNumber):
     faultReport = FaultReport.objects.get(job_number=jobNumber)
     deadline = faultReport.deadline

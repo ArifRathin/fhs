@@ -1,0 +1,193 @@
+{% extends 'base-front-end/admin/base.html' %}
+{% block title %}
+  <title>{{ page_ }}</title>
+{% endblock %}
+{% block css %}
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+{% endblock %}
+{% block content %}
+<!--begin::App Main-->
+<main class="app-main">
+  <!--begin::App Content Header-->
+  <div class="app-content-header">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-sm-6">
+          <h3 class="mb-0">{{ page_ }}</h3>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ page_ }}</li>
+          </ol>
+        </div>
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content Header-->
+  <!--begin::App Content-->
+  <div class="app-content">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row g-4">
+        <!--begin::Col-->
+        <div class="col-12">
+          {% for message in messages %}
+            {% if message.extra_tags == 'success-edit-workerhistory' %}
+              <div class="callout callout-success">
+                {{ message }}
+              </div>
+            {% elif message.extra_tags == 'error-edit-workerhistory' %}
+              <div class="callout callout-danger">
+                {{ message }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <!--end::Col-->
+        <!--begin::Col-->
+        <div class="col-md-6">
+          <!--begin::Quick Example-->
+          <div class="card card-primary card-outline mb-4">
+            <!--begin::Form-->
+            <form action="{% url 'edit-workerhistory' %}" method="POST">
+              {% csrf_token %}
+              <!--begin::Body-->
+              <div class="card-body">
+                <div class="mb-3">
+                  <input type="hidden" name="history-id" value="{{ history.id }}">
+                  <label for="" class="form-label mb-0">Job Number</label>
+                  <select class="job-number-class form-control" id="id-job-number" name="job-number" id="">
+                    {% if history.job_number %}
+                      <option value="{{ history.job_number }}">{{ history.job_number }}</option>
+                    {% endif %}
+                    {% for number in job_numbers %}
+                      {% if history.job_number != number %}
+                        <option value="{{ number }}">{{ number }}</option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label mb-0">Purchase Order Number</label>
+                  <select class="form-control" id="id-po-number" name="po-number">
+                    {% if history.po_number %}
+                      <option value="{{ history.po_number }}">{{ history.po_number }}</option>
+                    {% endif %}
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="exampleInputPassword1" class="form-label mb-0">Reference</label>
+                  <select class="form-control" id="id-quote-ref" name="ref" id="">
+                    {% if history.ref %}
+                      <option value="{{ history.ref }}">{{ history.ref }}</option>
+                    {% endif %}
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label mb-0">Charge</label>
+                  <input type="number" step="0.01" min="1" name="charge" value="{{ history.charge }}" class="form-control" id=""/>
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label mb-0">Date Completed</label>
+                  <input type="datetime-local" name="date-completed" value="{{ history.date_completed|date:'Y-m-d\TH:i' }}" class="form-control" id=""/>
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label mb-0">Signed By</label>
+                  <input type="text" name="signed-by" value="{{ history.signed_by }}" class="form-control" id=""/>
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label mb-0">Note</label>
+                  <textarea class="form-control" name="note" id="">{{ history.note }}</textarea>
+                </div>
+              </div>
+              <!--end::Body-->
+              <!--begin::Footer-->
+              <div class="card-footer">
+                <button type="submit" class="btn btn-primary">Save</button>
+              </div>
+              <!--end::Footer-->
+            </form>
+            <!--end::Form-->
+          </div>
+          <!--end::Quick Example-->
+        </div>
+        <!--end::Col-->
+        <!--begin::Col-->
+        <div class="col-md-6">
+        </div>
+        <!--end::Col-->
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content-->
+</main>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script defer>
+  $(document).ready(function(){
+
+    $('.job-number-class').select2({
+      placeholder: "Select a job number",
+      allowClear: true,
+      tags:true
+    });
+
+    $('#id-po-number').select2({
+      placeholder: "Select a purchase order number",
+      allowClear: true,
+      tags:true
+    });
+
+    $('#id-quote-ref').select2({
+      placeholder: "Select a quote ref",
+      allowClear: true,
+      tags:true
+    });
+
+    // Populate po number field
+    $('#id-job-number').on('change', function(e){
+      jobNumber = $('#id-job-number').val();
+      $('#id-po-number').empty();
+      $('#id-quote-ref').empty();
+      $.ajax({
+        url:"{% url 'get-po-ref-number' %}",
+        method:'GET',
+        data:{'jobNumber':jobNumber},
+        success:function(response){
+
+          console.log(response);
+
+          if(response.po_number){
+            var option = `<option value="`+response.po_number+`">`+response.po_number+`</option>`;
+            $('#id-po-number').append(option).trigger('change');
+          }
+          else{
+            var option = `<option></option>`;
+            $('#id-po-number').append(option).trigger('change');
+          }
+
+          if(response.ref){
+            var option = `<option value="`+response.ref+`">`+response.ref+`</option>`;
+            $('#id-quote-ref').append(option).trigger('change');
+          }
+          else{
+            var option = `<option></option>`;
+            $('#id-quote-ref').append(option).trigger('change');
+          }
+
+        }
+      })
+    })
+  });
+  
+</script>
+{% endblock %}

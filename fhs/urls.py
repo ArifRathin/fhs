@@ -32,7 +32,8 @@ urlpatterns = [
     path('user-management-area/', include('quotation.urls')),
     path('front-area/', include('fault_report.urls')),
     path('front-page/', include('front_page.urls')),
-    path('property/', include('property.urls'))
+    path('property/', include('property.urls')),
+    path('contractor/', include('contractor.urls'))
 ]
 
 if settings.DEBUG:

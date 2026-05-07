@@ -1,0 +1,130 @@
+{% extends 'base-front-end/admin/base.html' %}
+{% block title %}
+  <title>{{ page_ }}</title>
+{% endblock %}
+{% block content %}
+<!--begin::App Main-->
+<main class="app-main">
+  <!--begin::App Content Header-->
+  <div class="app-content-header">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-sm-6">
+          <h3 class="mb-0">{{ page_ }}</h3>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ page_ }}</li>
+          </ol>
+        </div>
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+  </div>
+  <!--end::App Content Header-->
+  <!--begin::App Content-->
+  <div class="app-content">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::Row-->
+      <div class="row">
+        <div class="col-12 my-3">
+          {% for message in messages %}
+            {% if message.extra_tags == 'success-delete-worker' %}
+              <div class="callout callout-success">
+                {{ message }}
+              </div>
+            {% elif message.extra_tags == 'error-delete-worker' %}
+              <div class="callout callout-danger">
+                {{ message }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <div class="col-md-12">
+          <!-- /.card -->
+          <div class="card mb-4">
+            <!-- /.card-header -->
+            <div class="card-body p-0">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Photo</th>
+                    <th>Name</th>
+                    <th>Trade Name</th>
+                    <th>Region</th>
+                    <th>History</th>
+                    <th>Email</th>
+                    <th>Contact Number</th>
+                    <th>Out of Hour?</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for worker in workers %}
+                  <tr class="align-middle">
+                    <td>
+                        <img class="img img-fluid" style="height:60px;" src="/media/{{ worker.photo }}" alt="">
+                    </td>
+                    <td>{{ worker.name }}</td>
+                    <td>{{ worker.trade_name }}</td>
+                    <td>{{ worker.region }}</td>
+                    <td>
+                      <a class="text-dark" href="{% url 'workerhistory-list' workerId=worker.id %}">{{ worker.workerhistory_set.count }}</a>
+                    </td>
+                    <td>{{ worker.email }}</td>
+                    <td>{{ worker.contact_no1 }}</td>
+                    <td>
+                        {% if worker.out_of_hour %}
+                            Yes
+                        {% else %}
+                            No
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if perms.contractor.change_worker %}
+                            <a class="text-primary" href="{% url 'edit-worker' workerId=worker.id %}"><i class="bi bi-pencil"></i></a>
+                        {% endif %}
+                        {% if perms.contractor.add_workerhistory %}
+                            <a class="text-primary" href="{% url 'create-workerhistory' workerId=worker.id %}" title="Add History"><i class="bi bi-plus"></i></a>
+                        {% endif %}
+                        {% if perms.contractor.delete_worker %}
+                            <a data-bs-toggle="modal" data-bs-target="#deleteModal" class="text-danger" href="" onclick="deleteRecord('this worker?', `{% url 'delete-worker' workerId=worker.id %}`)"><i class="bi bi-trash"></i></a>
+                        {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <!-- /.card-body -->
+          </div>
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
+        <!-- /.col -->
+         <div class="col-md-12 text-center">
+          {% if workers.has_previous %}
+            <a class="btn btn-sm btn-secondary" href="?page=1">&laquo; First</a>
+            <a class="btn btn-sm btn-secondary" href="?page={{ workers.previous_page_number }}">Previous</a>
+          {% endif %}
+            <a class="btn btn-sm btn-secondary" href="?page={{ workers.number }}">{{ workers.number }}</a>
+          {% if workers.has_next %}
+            <a class="btn btn-sm btn-secondary" href="?page={{ workers.next_page_number }}">Next</a>
+            <a class="btn btn-sm btn-secondary" href="?page={{ workers.paginator.num_pages }}">&raquo; Last</a>
+          {% endif %}
+         </div>
+      </div>
+      <!--end::Row-->
+    </div>
+    <!--end::Container-->
+    {% include 'base-front-end/modals/delete-modal.html' %} 
+  </div>
+  <!--end::App Content-->
+</main>
+<!--end::App Main-->
+{% endblock %}

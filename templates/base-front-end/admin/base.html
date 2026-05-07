@@ -556,6 +556,35 @@
               </ul>
             </li>
             {% endif %}
+            {% if request.user.is_admin %}
+            <li class="nav-item {% if sub_menu == 'Contractor' %}menu-open{% endif %}">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-house"></i>
+                <p>
+                  Contractors
+                  <i class="nav-arrow bi bi-chevron-right"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                  {% if perms.contractor.add_worker %}
+                    <li class="nav-item">
+                      <a href="{% url 'create-worker' %}" class="nav-link">
+                        <i class="nav-icon bi bi-circle{% if page_ == 'Create Worker' %}-fill{% endif %}"></i>
+                        <p>Create Worker</p>
+                      </a>
+                    </li>
+                  {% endif %}
+                  {% if perms.contractor.view_worker %}
+                    <li class="nav-item">
+                      <a href="{% url 'worker-list' %}" class="nav-link">
+                        <i class="nav-icon bi bi-circle{% if page_ == 'Worker List' %}-fill{% endif %}"></i>
+                        <p>Worker List</p>
+                      </a>
+                    </li>
+                  {% endif %}
+              </ul>
+            </li>
+            {% endif %}
             {% endif %}
           </ul>
           <!--end::Sidebar Menu-->
