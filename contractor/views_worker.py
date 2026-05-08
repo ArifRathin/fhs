@@ -9,37 +9,86 @@ from fhs.image_processor import processImage
 def createWorker(request):
     if request.method == 'POST':
         name = request.POST.get('name').strip()
+        if name == '':
+            messages.error(request, 'Name is mandatory!', extra_tags='error-create-worker')
+            return redirect(request.META['HTTP_REFERER'])
+        email = request.POST.get('email').strip()
+        if Worker.objects.filter(email=email).exists():
+            messages.error(request, 'A worker with a similar email already exists!', extra_tags='error-create-worker')
+            return redirect(request.META['HTTP_REFERER'])
+        if email == '':
+            messages.error(request, 'Email is mandatory!', extra_tags='error-create-worker')
+            return redirect(request.META['HTTP_REFERER'])
+        contactNo1 = request.POST.get('contact-number1').strip()
+        if Worker.objects.filter(contact_no1=contactNo1).exists():
+            messages.error(request, 'A worker with a similar primary contact number already exists!', extra_tags='error-create-worker')
+            return redirect(request.META['HTTP_REFERER'])
+        if contactNo1 == '':
+            messages.error(request, 'Contact number 1 is mandatory!', extra_tags='error-create-worker')
+            return redirect(request.META['HTTP_REFERER'])
+        elif len(contactNo1) > 20:
+            messages.error(request, 'Contact number cannot exceed 20 characters.', extra_tags='error-create-worker')
+            return redirect(request.META['HTTP_REFERER'])
+        contactNo2 = request.POST.get('contact-number2').strip()
+        if len(contactNo2) > 20:
+            messages.error(request, 'Contact number cannot exceed 20 characters.', extra_tags='error-create-worker')
+            return redirect(request.META['HTTP_REFERER'])
+        postCode = request.POST.get('post-code').strip()
+        if len(postCode) > 12:
+            messages.error(request, 'Post code cannot exceed 20 characters.', extra_tags='error-create-worker')
+            return redirect(request.META['HTTP_REFERER'])
+        ethnicity = request.POST.get('ethnicity').strip()
+        if len(ethnicity) > 30:
+            messages.error(request, 'Ethnicity cannot exceed 30 characters.', extra_tags='error-create-worker')
+            return redirect(request.META['HTTP_REFERER'])
+        reliabilityMax = request.POST.get('reliability-max').strip()
+        if reliabilityMax != '':
+            rmNum = int(reliabilityMax)
+            if rmNum < 0 or rmNum > 10:
+                messages.error(request, 'Max reliability must be between 0 and 10', extra_tags='error-create-worker')
+                return redirect(request.META['HTTP_REFERER'])
+        else:
+            reliabilityMax = None
+        travelRadius = request.POST.get('travel-radius').strip()
+        if travelRadius != '':
+            trNum = int(travelRadius)
+            if trNum < 0 or trNum > 16000:
+                messages.error(request, 'Travel radius must be between 0 and 16000', extra_tags='error-create-worker')
+                return redirect(request.META['HTTP_REFERER'])
+        else:
+            travelRadius = None
+        rates = request.POST.get('rates').strip()
+        if rates != '':
+            rateNum = int(rates)
+            if rateNum < 0:
+                messages.error(request, 'Rates must be a positive amount.', extra_tags='error-create-worker')
+                return redirect(request.META['HTTP_REFERER'])
+        else:
+            rates = None
         tradeName = request.POST.get('trade-name').strip()
         address = request.POST.get('address').strip()
-        postCode = request.POST.get('post-code').strip()
         region = request.POST.get('region').strip()
-        email = request.POST.get('email').strip()
-        contactNo1 = request.POST.get('contact-number1').strip()
-        contactNo2 = request.POST.get('contact-number2').strip()
-        ethnicity = request.POST.get('ethnicity').strip()
-        reliabilityMax = request.POST.get('reliability-max').strip()
-        travelRadius = request.POST.get('travel-radius').strip()
         vehicle = request.POST.get('has-vehicle').strip()
-        if vehicle == '0':
-            vehicle = False
-        else:
+        if vehicle == '1':
             vehicle = True
-        outOfHour = request.POST.get('if-ooh').strip()
-        if outOfHour == '0':
-            outOfHour = False
         else:
+            vehicle = False
+        outOfHour = request.POST.get('if-ooh').strip()
+        if outOfHour == '1':
             outOfHour = True
+        else:
+            outOfHour = False
         note = request.POST.get('note').strip()
-        rates = request.POST.get('rates').strip()
         specialities = request.POST.get('specialities').strip()
         insurance = request.POST.get('has-insurance').strip()
-        if insurance == '0':
-            insurance = False
-        else:
+        if insurance == '1':
             insurance = True
+        else:
+            insurance = False
         expiryDate = request.POST.get('expiry-date').strip()
+        if expiryDate == '':
+            expiryDate = None
         photo = request.FILES.get('photo')
-
         try:
             worker = Worker.objects.create(name=name, trade_name=tradeName, address=address, post_code=postCode,
                                   region=region, email=email, contact_no1=contactNo1, contact_no2=contactNo2,
@@ -52,7 +101,7 @@ def createWorker(request):
             messages.success(request, 'Successfully created worker.', extra_tags='success-create-worker')
             return redirect(request.META['HTTP_REFERER'])
         except Exception as e:
-            messages.error(request, 'Something went wrong!', extra_tags='error-create-worker')
+            messages.error(request, str(e), extra_tags='error-create-worker')
             return redirect(request.META['HTTP_REFERER'])
     else:
         notifications = Notification.objects.filter(is_opened=False, notif_for_id=request.user.id).order_by('-id')

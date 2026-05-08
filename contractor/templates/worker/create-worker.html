@@ -57,8 +57,20 @@
               <!--begin::Body-->
               <div class="card-body">
                 <div class="mb-3">
-                  <label for="" class="form-label mb-0">Name</label>
-                  <input type="text" name="name" class="form-control" id=""/>
+                  <label for="" class="form-label mb-0">Name<span class="text-danger">*</span></label>
+                  <input required type="text" name="name" class="form-control" id=""/>
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label mb-0">Contact Number 1<span class="text-danger">*</span></label>
+                  <input required type="text" name="contact-number1" class="form-control" id=""/>
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label mb-0">Contact Number 2</label>
+                  <input type="text" name="contact-number2" class="form-control" id=""/>
+                </div>
+                <div class="mb-3">
+                  <label for="" class="form-label mb-0">Email<span class="text-danger">*</span></label>
+                  <input required type="email" name="email" class="form-control" id=""/>
                 </div>
                 <div class="mb-3">
                   <label for="" class="form-label mb-0">Trade Name</label>
@@ -77,38 +89,26 @@
                   <input type="text" name="region" class="form-control" id=""/>
                 </div>
                 <div class="mb-3">
-                  <label for="" class="form-label mb-0">Email</label>
-                  <input type="email" name="email" class="form-control" id=""/>
-                </div>
-                <div class="mb-3">
-                  <label for="" class="form-label mb-0">Contact Number 1</label>
-                  <input type="text" name="contact-number1" class="form-control" id=""/>
-                </div>
-                <div class="mb-3">
-                  <label for="" class="form-label mb-0">Contact Number 2</label>
-                  <input type="text" name="contact-number2" class="form-control" id=""/>
-                </div>
-                <div class="mb-3">
                   <label for="" class="form-label mb-0">Ethnicity</label>
                   <input type="text" name="ethnicity" class="form-control" id=""/>
                 </div>
                 <div class="mb-3">
                   <label for="" class="form-label mb-0">Reliability Max</label>
-                  <input type="number" name="reliability-max" class="form-control" id=""/>
+                  <input type="number" min="0" max="10" step="0.01" name="reliability-max" class="form-control" id=""/>
                 </div>
                 <div class="mb-3">
                   <label for="" class="form-label mb-0">Travel Radius</label>
-                  <input type="number" name="travel-radius" class="form-control" id=""/>
+                  <input type="number" min="0" max="16000" step="0.01" name="travel-radius" class="form-control" id=""/>
                 </div>
                 <div class="mb-3">
                   <label for="" class="form-label mb-0">Vehicle</label><br>
                   <input type="radio" name="has-vehicle" value="1" id=""/>Yes
-                  <input type="radio" name="has-vehicle" value="0" id=""/>No
+                  <input type="radio" checked name="has-vehicle" value="0" id=""/>No
                 </div>
                 <div class="mb-3">
                   <label for="" class="form-label mb-0">Out of Hour</label><br>
                   <input type="radio" name="if-ooh" value="1" id=""/>Yes
-                  <input type="radio" name="if-ooh" value="0" id=""/>No
+                  <input type="radio" checked name="if-ooh" value="0" id=""/>No
                 </div>
                 <div class="mb-3">
                   <label for="exampleInputPassword1" class="form-label mb-0">Note</label>
@@ -116,7 +116,7 @@
                 </div>
                 <div class="mb-3">
                   <label for="exampleInputPassword1" class="form-label mb-0">Rates</label>
-                  <input type="number" name="rates" class="form-control" id=""/>
+                  <input type="number" min="0" step="0.01" name="rates" class="form-control" id=""/>
                 </div>
                 <div class="mb-3">
                   <label for="exampleInputPassword1" class="form-label mb-0">Specialities</label>
@@ -125,7 +125,7 @@
                 <div class="mb-3">
                   <label for="" class="form-label mb-0">Insurance</label><br>
                   <input type="radio" name="has-insurance" value="1" id=""/>Yes
-                  <input type="radio" name="has-insurance" value="0" id=""/>No
+                  <input type="radio" checked name="has-insurance" value="0" id=""/>No
                 </div>
                 <div class="mb-3">
                   <label for="exampleInputPassword1" class="form-label mb-0">Expiry Date</label>

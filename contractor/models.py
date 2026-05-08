@@ -32,7 +32,7 @@ class Worker(models.Model):
     rates = models.DecimalField(max_digits=5, decimal_places=2)
     specialities = models.TextField(default=None, null=True)
     insurance = models.BooleanField(default=False)
-    expiry_date = models.DateField()
+    expiry_date = models.DateField(default=None, null=True)
     photo = models.ImageField(upload_to=saveWorkerPhoto, default=None, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
