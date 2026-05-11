@@ -43,7 +43,7 @@ def createWorker(request):
             return redirect(request.META['HTTP_REFERER'])
         reliabilityMax = request.POST.get('reliability-max').strip()
         if reliabilityMax != '':
-            rmNum = int(reliabilityMax)
+            rmNum = int(float(reliabilityMax))
             if rmNum < 0 or rmNum > 10:
                 messages.error(request, 'Max reliability must be between 0 and 10', extra_tags='error-create-worker')
                 return redirect(request.META['HTTP_REFERER'])
@@ -51,7 +51,7 @@ def createWorker(request):
             reliabilityMax = None
         travelRadius = request.POST.get('travel-radius').strip()
         if travelRadius != '':
-            trNum = int(travelRadius)
+            trNum = int(float(travelRadius))
             if trNum < 0 or trNum > 16000:
                 messages.error(request, 'Travel radius must be between 0 and 16000', extra_tags='error-create-worker')
                 return redirect(request.META['HTTP_REFERER'])
@@ -59,7 +59,7 @@ def createWorker(request):
             travelRadius = None
         rates = request.POST.get('rates').strip()
         if rates != '':
-            rateNum = int(rates)
+            rateNum = int(float(rates))
             if rateNum < 0:
                 messages.error(request, 'Rates must be a positive amount.', extra_tags='error-create-worker')
                 return redirect(request.META['HTTP_REFERER'])
@@ -131,17 +131,62 @@ def workerList(request):
 def editWorker(request, workerId=0):
     if request.method == 'POST':
         workerId = request.POST.get('worker-id').strip()
+        if not Worker.objects.filter(id=workerId).exists():
+            messages.error(request, "Worker doesn't exist!", extra_tags='error-edit-worker')
+            return redirect(request.META['HTTP_REFERER'])
         name = request.POST.get('name').strip()
+        email = request.POST.get('email').strip()
+        if email != '':
+            if Worker.objects.filter(email=email).exclude(id=workerId).exists():
+                messages.error(request, 'The email you entered belongs to another worker!', extra_tags='error-edit-worker')
+                return redirect(request.META['HTTP_REFERER'])
+        contactNo1 = request.POST.get('contact-number1').strip()
+        if contactNo1 != '':
+            if Worker.objects.filter(contact_no1=contactNo1).exclude(id=workerId).exists():
+                messages.error(request, 'The primary contact number you entered belongs to another worker!', extra_tags='error-edit-worker')
+                return redirect(request.META['HTTP_REFERER'])
+        if len(contactNo1) > 20:
+            messages.error(request, 'Contact number cannot exceed 20 characters.', extra_tags='error-edit-worker')
+            return redirect(request.META['HTTP_REFERER'])
+        contactNo2 = request.POST.get('contact-number2').strip()
+        if len(contactNo2) > 20:
+            messages.error(request, 'Contact number cannot exceed 20 characters.', extra_tags='error-edit-worker')
+            return redirect(request.META['HTTP_REFERER'])
+        postCode = request.POST.get('post-code').strip()
+        if len(postCode) > 12:
+            messages.error(request, 'Post code cannot exceed 20 characters.', extra_tags='error-edit-worker')
+            return redirect(request.META['HTTP_REFERER'])
+        ethnicity = request.POST.get('ethnicity').strip()
+        if len(ethnicity) > 30:
+            messages.error(request, 'Ethnicity cannot exceed 30 characters.', extra_tags='error-edit-worker')
+            return redirect(request.META['HTTP_REFERER'])
+        reliabilityMax = request.POST.get('reliability-max').strip()
+        if reliabilityMax != '':
+            rmNum = int(float(reliabilityMax))
+            if rmNum < 0 or rmNum > 10:
+                messages.error(request, 'Max reliability must be between 0 and 10', extra_tags='error-edit-worker')
+                return redirect(request.META['HTTP_REFERER'])
+        else:
+            reliabilityMax = None
+        travelRadius = request.POST.get('travel-radius').strip()
+        if travelRadius != '':
+            trNum = int(float(travelRadius))
+            if trNum < 0 or trNum > 16000:
+                messages.error(request, 'Travel radius must be between 0 and 16000', extra_tags='error-edit-worker')
+                return redirect(request.META['HTTP_REFERER'])
+        else:
+            travelRadius = None
+        rates = request.POST.get('rates').strip()
+        if rates != '':
+            rateNum = int(float(rates))
+            if rateNum < 0:
+                messages.error(request, 'Rates must be a positive amount.', extra_tags='error-edit-worker')
+                return redirect(request.META['HTTP_REFERER'])
+        else:
+            rates = None
         tradeName = request.POST.get('trade-name').strip()
         address = request.POST.get('address').strip()
-        postCode = request.POST.get('post-code').strip()
         region = request.POST.get('region').strip()
-        email = request.POST.get('email').strip()
-        contactNo1 = request.POST.get('contact-number1').strip()
-        contactNo2 = request.POST.get('contact-number2').strip()
-        ethnicity = request.POST.get('ethnicity').strip()
-        reliabilityMax = request.POST.get('reliability-max').strip()
-        travelRadius = request.POST.get('travel-radius').strip()
         vehicle = request.POST.get('has-vehicle').strip()
         if vehicle == '0':
             vehicle = False
@@ -153,7 +198,6 @@ def editWorker(request, workerId=0):
         else:
             outOfHour = True
         note = request.POST.get('note').strip()
-        rates = request.POST.get('rates').strip()
         specialities = request.POST.get('specialities').strip()
         insurance = request.POST.get('has-insurance').strip()
         if insurance == '0':
@@ -161,11 +205,11 @@ def editWorker(request, workerId=0):
         else:
             insurance = True
         expiryDate = request.POST.get('expiry-date').strip()
+        if expiryDate == '':
+            expiryDate = None
         photo = request.FILES.get('photo')
         if photo:
             photo = processImage(photo)
-        else:
-            photo = None
     worker = Worker.objects.filter(id=workerId).first()
     if worker:
         if request.method == 'GET':
@@ -179,13 +223,16 @@ def editWorker(request, workerId=0):
             return render(request, 'worker/edit-worker.html', data)
         else:
             try:
-                worker.name = name
+                if name != '':
+                    worker.name = name
+                if email != '':
+                    worker.email = email
+                if contactNo1 != '':
+                    worker.contact_no1 = contactNo1
                 worker.trade_name = tradeName
                 worker.address = address
                 worker.post_code = postCode
                 worker.region = region
-                worker.email = email
-                worker.contact_no1 = contactNo1
                 worker.contact_no2 = contactNo2
                 worker.ethnicity = ethnicity
                 worker.reliability_max = reliabilityMax
