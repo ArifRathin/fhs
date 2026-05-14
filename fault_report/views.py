@@ -651,7 +651,7 @@ def completeTask(request, jobNumber):
 def faultReportDetails(request, jobNumber):
     faultReport = FaultReport.objects.get(job_number=jobNumber)
     isUserOrTechnician = faultReport.user_technician.filter(id=request.user.id).exists()
-    if (request.user.is_admin == True and request.user.has_perm('app.fault_report.view_faultreport') == False) and isUserOrTechnician == False:
+    if (request.user.is_admin == True and request.user.has_perm('fault_report.view_faultreport') == False) and isUserOrTechnician == False:
         return HttpResponse('Permission denied.')
     deadline = faultReport.deadline
     deadline_time_unit = faultReport.deadline_time_unit
