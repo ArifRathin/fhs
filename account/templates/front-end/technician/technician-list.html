@@ -76,6 +76,9 @@
                       {% endif %}
                     </td>
                     <td>
+                      {% if perms.account.view_user %}
+                        <a data-bs-toggle="modal" data-bs-target="#userDetailsModal" class="text-primary" href=""><i class="bi bi-eye"></i></a>
+                      {% endif %}
                       {% if perms.account.change_user %}
                         <a class="text-primary" href="{% url 'edit-technician' technicianId=technician.id %}"><i class="bi bi-pencil"></i></a>
                       {% endif %}
@@ -100,6 +103,7 @@
     </div>
     <!--end::Container-->
     {% include 'base-front-end/modals/delete-modal.html' %} 
+    {% include 'base-front-end/modals/user-details-modal.html' %} 
   </div>
   <!--end::App Content-->
 </main>

@@ -650,8 +650,8 @@ def completeTask(request, jobNumber):
 @login_required(login_url='login-user')
 def faultReportDetails(request, jobNumber):
     faultReport = FaultReport.objects.get(job_number=jobNumber)
-    isUserTechnician = faultReport.user_technician.filter(id=request.user.id).exists()
-    if request.user.has_perm('app.fault_report.view_faultreport') == False and isUserTechnician == False:
+    isUserOrTechnician = faultReport.user_technician.filter(id=request.user.id).exists()
+    if (request.user.is_admin == True and request.user.has_perm('app.fault_report.view_faultreport') == False) and isUserOrTechnician == False:
         return HttpResponse('Permission denied.')
     deadline = faultReport.deadline
     deadline_time_unit = faultReport.deadline_time_unit

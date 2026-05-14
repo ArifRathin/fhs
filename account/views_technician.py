@@ -1,4 +1,5 @@
-from django.shortcuts import render, HttpResponse, redirect
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from .models import User
 from notification.models import Notification
 from django.contrib.auth.decorators import permission_required
@@ -159,3 +160,22 @@ def deleteTechnician(request, technicianId):
     except:
         messages.error(request, 'Something went wrong!', extra_tags='error-delete-technician')
         return redirect(request.META['HTTP_REFERER'])
+    
+
+@permission_required('account.view_user', login_url='login-user', raise_exception=True)
+def technicianDetails(request):
+    technicianId = request.GET.get('technician-id')
+    technician = User.objects.filter(id=technicianId, is_technician=True).first()
+    if technician:
+        success = True
+        name = technician.first_name+' '+technician.last_name
+        email = technician.email
+        phone = technician.phone
+        if technician.is_active:
+            isActive = True
+        else:
+            isActive = False
+    else:
+        success = True
+
+    return JsonResponse({'success':success, 'name':name, 'email':email, 'phone':phone, 'is_active':isActive})
